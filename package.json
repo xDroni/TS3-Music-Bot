@@ -2,9 +2,9 @@
   "name": "ts3-musicbot-node",
   "version": "1.0.0",
   "description": "Music Bot for TeamSpeak 3 in NodeJS",
-  "main": "index.js",
+  "main": "src/main.js",
   "scripts": {
-    "test": "test"
+    "test": "node src/main.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/xDroni/TeamSpeak-3-Music-Bot/issues"
   },
-  "homepage": "https://github.com/xDroni/TeamSpeak-3-Music-Bot#readme"
+  "homepage": "https://github.com/xDroni/TeamSpeak-3-Music-Bot#readme",
+  "dependencies": {
+    "node-ts": "^5.0.1"
+  }
 }

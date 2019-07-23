@@ -1,7 +1,9 @@
 const { TeamSpeakClient } = require("node-ts");
-const getArgument = require("src/utils.js");
+const {getArgument} = require("./utils.js");
 
 async function main(host) {
+    console.log('test:', host);
+    
     const client = new TeamSpeakClient(host);
     try {
         await client.connect();
@@ -21,4 +23,4 @@ async function main(host) {
     }
 }
 
-main(getArgument(host));
+main(getArgument('host'));

@@ -1,5 +1,6 @@
-module.exports =
-    function getArgument(name) {
+const prompt = require('prompt-sync')();
+module.exports = {
+    getArgument(name) {
         for (let arg of process.argv) {
             if (arg.startsWith(name))
                 return arg.replace(name, '').substring(1);
@@ -12,4 +13,5 @@ module.exports =
             process.exit();
             return '';
         }
-    };
+    }
+}

@@ -4,7 +4,7 @@
   "description": "Music Bot for TeamSpeak 3 in NodeJS",
   "main": "src/main.js",
   "scripts": {
-    "test": "node src/main.js"
+    "dev": "NODE_ENV=dev nodemon --watch src/ --exec 'node ./src/main.js' -e js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,10 @@
   },
   "homepage": "https://github.com/xDroni/TeamSpeak-3-Music-Bot#readme",
   "dependencies": {
-    "node-ts": "^5.0.1"
+    "node-ts": "^5.0.1",
+    "prompt-sync": "^4.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
   }
 }

@@ -22,13 +22,25 @@ async function main(host, login, password) {
             return obj.client_nickname === "DJ Jaracz";
         });
 
-        await client.send("clientpoke", {
-            clid: musicBotInfo[0].clid,
-            msg: "poke message"
+        // await client.send("clientpoke", {
+        //     clid: musicBotInfo[0].clid,
+        //     msg: "poke message"
+        // });
+
+        const channelList = await client.send("channellist");
+
+        let musicChannel = channelList.response.filter((obj) => {
+            return obj.channel_name === 'Liga Legend';
         });
 
-        await client.subscribeChannelTextEvents();
-        client.on("textmessage", (data) => {
+        await client.subscribePrivateTextEvents();
+
+        await client.send("servernotifyregister", {
+            event: "textchannel",
+            channelId: 2
+        });
+
+        await client.on("textmessage", data => {
             console.log("Message received: " + data.msg);
         });
 

@@ -16,25 +16,16 @@ async function main(host, login, password) {
                                     client_login_password: password
         });
 
-        // const me = client.send("whoami");
-        // me.then((result) => {
-        //     console.log(result);
-        // });
-        //
-        let hostinfo = await client.send("hostinfo");
-        console.log(hostinfo);
-
         let clientlist = await client.send("clientlist");
-        console.log(JSON.stringify(clientlist.response));
 
-        // let nodeClid = clientlist.response.filter((nickname) => {
-        //     return nickname.
-        // })
+        let musicBotInfo = clientlist.response.filter((obj) => {
+            return obj.client_nickname === "DJ Jaracz";
+        });
 
-        // await client.send("clientpoke", {
-        //     clid: 3,
-        //     msg: "elko"
-        // });
+        await client.send("clientpoke", {
+            clid: musicBotInfo[0].clid,
+            msg: "poke message"
+        });
 
         await client.subscribeChannelTextEvents();
         client.on("textmessage", (data) => {

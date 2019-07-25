@@ -25,8 +25,21 @@ async function main(host, login, password) {
         console.log(hostinfo);
 
         let clientlist = await client.send("clientlist");
-        console.log(clientlist);
+        console.log(JSON.stringify(clientlist.response));
 
+        // let nodeClid = clientlist.response.filter((nickname) => {
+        //     return nickname.
+        // })
+
+        // await client.send("clientpoke", {
+        //     clid: 3,
+        //     msg: "elko"
+        // });
+
+        await client.subscribeChannelTextEvents();
+        client.on("textmessage", (data) => {
+            console.log("Message received: " + data.msg);
+        });
 
     } catch(err) {
         console.error("An error occurred: ");

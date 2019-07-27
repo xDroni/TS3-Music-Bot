@@ -12,7 +12,7 @@ module.exports = {
 		if( !msg.trim().startsWith('!') )//not a command
 			return;
 		
-		let [cmd, ...args] = msg.substring(1).split(' ');
+		let [cmd, ...args] = msg.trim().substring(1).split(' ');
 		console.log(cmd, args);
 		
 		switch(cmd) {

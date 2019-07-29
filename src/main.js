@@ -7,17 +7,17 @@ const { handleMessage } = require("./message_handler.js");
  * @param {number} channel_id
  * */
 async function moveAdminTo(client, channel_id) {
-	const clientlist = await client.send("clientlist");
-	let serveradmin = clientlist.response.find((obj) => {
+    const clientList = await client.send("clientlist");
+	let serverAdmin = clientList.response.find((obj) => {
 		return obj.client_type === 1 && obj.client_nickname.match(/^serveradmin/i);
 	});
 	
-	if (serveradmin) {
-		if (serveradmin.cid !== channel_id)//if serveradmin is not already in target channel
-			await client.send('clientmove', {clid: serveradmin.clid, cid: channel_id});
+	if (serverAdmin) {
+		if (serverAdmin.cid !== channel_id)//if serverAdmin is not already in target channel
+			await client.send('clientmove', {clid: serverAdmin.clid, cid: channel_id});
 	}
 	else
-		console.error('Music bot or serveradmin has not been found');
+		console.error('Music bot or serverAdmin has not been found');
 }
 
 async function main(host, login, password) {
@@ -36,22 +36,51 @@ async function main(host, login, password) {
             client_login_password: password
         });
         
-        await client.subscribePrivateTextEvents();
+        // await client.subscribePrivateTextEvents();
 
+        // register notifications when user sends message on server channel
         await client.send("servernotifyregister", {
-            event: "textchannel",
-            channelId: 2
+            event: "textserver"
+        });
+
+        // register notifications when user sends message on normal channel
+        await client.send("servernotifyregister", {
+            event: "textchannel"
+        });
+
+        // register server events notifications
+        await client.send("servernotifyregister", {
+            event: "server"
         });
 
         const clientlist = await client.send("clientlist");
 
+        // listening for server to be edited
+        await client.on('serveredited', data => {
+            console.log('Server edited!');
+            if(data[0]) {
+               console.log(data[0]);
+            }
+        });
+
+        // listening for client move to other channel // TODO: not working
+        await client.on('clientmoved', data => {
+            console.log('Client moved!');
+            if(data[0]) {
+               console.log(data[0]);
+            }
+        });
+
         let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === "DJ Jaracz");
-        if(musicBotInfo)
+        if(musicBotInfo) {
             await moveAdminTo(client, musicBotInfo.cid);
+            console.log('Admin moved to :', musicBotInfo.cid);
+        }
         else
         	console.error('DJ Jaracz not found');
-        
-        //listening for messages
+
+
+        // listening for messages
         await client.on("textmessage", data => {
             if(data[0])
                 handleMessage(client, data[0]);

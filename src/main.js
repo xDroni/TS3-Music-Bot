@@ -13,14 +13,13 @@ async function moveAdminTo(client, channel_id) {
 	});
 	
 	if (serverAdmin) {
+        await client.send("servernotifyregister", {
+            event: "channel",
+            id: 0 // listen to all channels
+        });
+
 		if (serverAdmin.cid !== channel_id) {//if serverAdmin is not already in target channel
 			await client.send('clientmove', {clid: serverAdmin.clid, cid: channel_id});
-			
-			await client.send("servernotifyregister", {
-	            event: "channel",
-		        id: 0 // listen to all channels
-	        });
-			
 			console.log('Admin moved to :', channel_id);
 		}
 	}

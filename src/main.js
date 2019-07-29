@@ -18,7 +18,7 @@ async function moveAdminTo(client, channel_id) {
 			
 			await client.send("servernotifyregister", {
 	            event: "channel",
-		        id: channel_id
+		        id: 0 // listen to all channels
 	        });
 			
 			console.log('Admin moved to :', channel_id);

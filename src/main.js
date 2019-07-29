@@ -13,8 +13,16 @@ async function moveAdminTo(client, channel_id) {
 	});
 	
 	if (serverAdmin) {
-		if (serverAdmin.cid !== channel_id)//if serverAdmin is not already in target channel
+		if (serverAdmin.cid !== channel_id) {//if serverAdmin is not already in target channel
 			await client.send('clientmove', {clid: serverAdmin.clid, cid: channel_id});
+			
+			await client.send("servernotifyregister", {
+	            event: "channel",
+		        id: channel_id
+	        });
+			
+			console.log('Admin moved to :', channel_id);
+		}
 	}
 	else
 		console.error('Music bot or serverAdmin has not been found');
@@ -28,6 +36,8 @@ async function main(host, login, password) {
     const client = new TeamSpeakClient(host);
     
     try {
+    	client.on('error', e => console.error(e));
+    	
         await client.connect();
         await client.send("use", {sid: 1});
 
@@ -63,25 +73,20 @@ async function main(host, login, password) {
             }
         });
 
-        // listening for client move to other channel // TODO: not working
-        await client.on('clientmoved', data => {
-            console.log('Client moved!');
-            if(data[0]) {
-               console.log(data[0]);
-            }
-        });
-
         let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === "DJ Jaracz");
-        if(musicBotInfo) {
+        if(musicBotInfo)
             await moveAdminTo(client, musicBotInfo.cid);
-            console.log('Admin moved to :', musicBotInfo.cid);
-        }
         else
         	console.error('DJ Jaracz not found');
-
+        
+        // listening for client move to other channel
+	    client.on('clientmoved', data => {
+	    	if(musicBotInfo && data[0] && data[0].clid === musicBotInfo.clid)
+	    		moveAdminTo(client, data[0].ctid).catch(console.error);
+	    });
 
         // listening for messages
-        await client.on("textmessage", data => {
+        client.on("textmessage", data => {
             if(data[0])
                 handleMessage(client, data[0]);
         });

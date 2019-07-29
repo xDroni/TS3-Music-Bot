@@ -6,13 +6,14 @@ module.exports = {
 	 * @param {TextMessageNotificationData} message
 	 * */
 	handleMessage(client, message) {
-		const {msg, invokername, invokerid} = message;
+		let {msg, invokername, invokerid} = message;
+		msg = msg.toString().trim();
 		console.log(`Message received from ${invokername}[${invokerid}]: ${msg}`);
 		
-		if( !msg.trim().startsWith('!') )//not a command
+		if( !msg.startsWith('!') )//not a command
 			return;
 		
-		let [cmd, ...args] = msg.trim().substring(1).split(' ');
+		let [cmd, ...args] = msg.substring(1).split(' ');
 		console.log(cmd, args);
 		
 		switch(cmd) {

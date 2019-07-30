@@ -2,6 +2,8 @@ const { TeamSpeakClient } = require("node-ts");
 const { getArgument } = require("./utils.js");
 const { handleMessage } = require("./message_handler.js");
 
+import Playlist from "./playlist";
+
 /**
  * @param {TeamSpeakClient} client
  * @param {number} channel_id

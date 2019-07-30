@@ -1,8 +1,7 @@
 const { TeamSpeakClient } = require("node-ts");
 const { getArgument } = require("./utils.js");
 const { handleMessage } = require("./message_handler.js");
-
-import Playlist from "./playlist";
+const Playlist = require("./playlist.js");
 
 /**
  * @param {TeamSpeakClient} client
@@ -35,7 +34,8 @@ async function main(host, login, password) {
     //console.log('password:', password);
 
     const client = new TeamSpeakClient(host);
-    
+    let playlist = new Playlist(); // declaring the playlist queue
+
     try {
     	client.on('error', e => console.error(e));
     	

@@ -9,6 +9,7 @@ const Playlist = require("./playlist.js");
  * */
 async function moveAdminTo(client, channel_id) {
     const clientList = await client.send("clientlist");
+    const channelList = await client.send('channellist');
 	let serverAdmin = clientList.response.find((obj) => {
 		return obj.client_type === 1 && obj.client_nickname.match(/^serveradmin/i);
 	});
@@ -21,7 +22,8 @@ async function moveAdminTo(client, channel_id) {
 
 		if (serverAdmin.cid !== channel_id) {//if serverAdmin is not already in target channel
 			await client.send('clientmove', {clid: serverAdmin.clid, cid: channel_id});
-			console.log('Admin moved to :', channel_id);
+			let channel_name = channelList.response.find((obj) => obj.cid === channel_id).channel_name;
+			console.log('Admin moved to:', channel_name, 'cid:', channel_id);
 		}
 	}
 	else
@@ -49,10 +51,10 @@ async function main(host, login, password) {
         
         // await client.subscribePrivateTextEvents();
 
-        // register notifications when user sends message on server channel
-        await client.send("servernotifyregister", {
-            event: "textserver"
-        });
+        // // register notifications when user sends message on server channel
+        // await client.send("servernotifyregister", {
+        //     event: "textserver"
+        // });
 
         // register notifications when user sends message on normal channel
         await client.send("servernotifyregister", {
@@ -89,7 +91,7 @@ async function main(host, login, password) {
         // listening for messages
         client.on("textmessage", data => {
             if(data[0])
-                handleMessage(client, data[0]);
+                handleMessage(client, data[0], playlist);
         });
     } catch(err) {
         console.error("An error occurred: ");

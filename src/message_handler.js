@@ -5,7 +5,7 @@ module.exports = {
 	 * @param {TeamSpeakClient} client
 	 * @param {TextMessageNotificationData} message
 	 * */
-	handleMessage(client, message) {
+	handleMessage(client, message, playlist) {
 		let {msg, invokername, invokerid} = message;
 		msg = msg.toString().trim();
 		console.log(`Message received from ${invokername}[${invokerid}]: ${msg}`);
@@ -14,14 +14,18 @@ module.exports = {
 			return;
 		
 		let [cmd, ...args] = msg.substring(1).split(' ');
-		console.log(cmd, args);
 		
 		switch(cmd) {
 			default:
-				console.log('Unknown command');
+				console.log('Unknown command', msg);
 				break;
-			case 'test':
+			case 'sr':
+				let songName = args.join(' ');
+				console.log('Song name:', songName);
 				console.log('arguments:', args);
+				playlist.add(songName);
+				console.log('Added', songName, 'to the playlist');
+				console.log(playlist.getSize());
 				break;
 		}
 	}

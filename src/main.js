@@ -1,8 +1,6 @@
 const { TeamSpeakClient } = require("node-ts");
 const { getArgument } = require("./utils.js");
 const { handleMessage } = require("./message_handler.js");
-const Playlist = require("./playlist.js");
-const AudioHandler = require("./yt-audio-stream");
 
 /**
  * @param {TeamSpeakClient} client
@@ -16,11 +14,6 @@ async function moveAdminTo(client, channel_id) {
 	});
 
 	if (serverAdmin) {
-        await client.send("servernotifyregister", {
-            event: "channel",
-            id: 0 // listen to all channels
-        });
-
 		if (serverAdmin.cid !== channel_id) {//if serverAdmin is not already in target channel
 			await client.send('clientmove', {clid: serverAdmin.clid, cid: channel_id});
 			let channel_name = channelList.response.find((obj) => obj.cid === channel_id).channel_name;
@@ -35,11 +28,8 @@ async function main(host, login, password) {
     //console.log('host:', host);
     //console.log('login:', login);
     //console.log('password:', password);
-    let audio = new AudioHandler();
-    audio.play('https://www.youtube.com/watch?v=3ah4t1P9yFA');
 
     const client = new TeamSpeakClient(host);
-    let playlist = new Playlist(); // declaring the playlist queue
 
     try {
     	client.on('error', e => console.error(e));
@@ -68,6 +58,11 @@ async function main(host, login, password) {
         await client.send("servernotifyregister", {
             event: "server"
         });
+        
+        await client.send("servernotifyregister", {
+            event: "channel",
+            id: 0 // listen to all channels
+        });
 
         const clientlist = await client.send("clientlist");
 
@@ -94,7 +89,7 @@ async function main(host, login, password) {
         // listening for messages
         client.on("textmessage", data => {
             if(data[0])
-                handleMessage(client, data[0], playlist);
+                handleMessage(client, data[0]);
         });
     } catch(err) {
         console.error("An error occurred: ");

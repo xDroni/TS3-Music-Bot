@@ -1,20 +1,23 @@
 const stream = require('youtube-audio-stream');
-let url;
 const decoder = require('lame').Decoder;
 const speaker = require('speaker');
 
 class AudioHandler {
-    constructor(_url) {
-        if(_url === undefined)
-            url = 'https://www.youtube.com/watch?v=3ah4t1P9yFA';
-        else
-            url = _url;
+    
+    /** @param {string} url */
+    constructor(url) {
+        this.url = url;
     }
-
-    play() {
-        stream(url)
+    
+    /** @param {Function} onEnd */
+    play(onEnd) {
+        let s = stream(this.url)
             .pipe(decoder())
             .pipe(new speaker());
+        
+        s.on('error',(e) => onEnd(e));
+        //s.on('finish',() => onEnd());
+        s.on('close',() => onEnd());
     }
 }
 

@@ -19,13 +19,13 @@ module.exports = {
 			default:
 				console.log('Unknown command', msg);
 				break;
-			case 'sr':
+			case 'sr': // song request
 				let songName = args.join(' ');
 				console.log('Song name:', songName);
 				console.log('arguments:', args);
 				playlist.add(songName);
 				console.log('Added', songName, 'to the playlist');
-				console.log(playlist.getSize());
+				console.log('Playlist size:', playlist.getSize());
 				break;
 		}
 	}

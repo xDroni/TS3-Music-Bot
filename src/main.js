@@ -2,6 +2,7 @@ const { TeamSpeakClient } = require("node-ts");
 const { getArgument } = require("./utils.js");
 const { handleMessage } = require("./message_handler.js");
 const Playlist = require("./playlist.js");
+const AudioHandler = require("./yt-audio-stream");
 
 /**
  * @param {TeamSpeakClient} client
@@ -13,7 +14,7 @@ async function moveAdminTo(client, channel_id) {
 	let serverAdmin = clientList.response.find((obj) => {
 		return obj.client_type === 1 && obj.client_nickname.match(/^serveradmin/i);
 	});
-	
+
 	if (serverAdmin) {
         await client.send("servernotifyregister", {
             event: "channel",
@@ -34,13 +35,15 @@ async function main(host, login, password) {
     //console.log('host:', host);
     //console.log('login:', login);
     //console.log('password:', password);
+    let audio = new AudioHandler();
+    audio.play('https://www.youtube.com/watch?v=3ah4t1P9yFA');
 
     const client = new TeamSpeakClient(host);
     let playlist = new Playlist(); // declaring the playlist queue
 
     try {
     	client.on('error', e => console.error(e));
-    	
+
         await client.connect();
         await client.send("use", {sid: 1});
 

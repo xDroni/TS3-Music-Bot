@@ -1,6 +1,8 @@
 const { TeamSpeakClient } = require("node-ts");
-const { getArgument } = require("./utils.js");
+const { getArgument, escapeRegExp } = require("./utils.js");
 const { handleMessage } = require("./message_handler.js");
+
+const NICKNAME = 'MusicBot';
 
 /**
  * @param {TeamSpeakClient} client
@@ -10,7 +12,8 @@ async function moveAdminTo(client, channel_id) {
     const clientList = await client.send("clientlist");
     const channelList = await client.send('channellist');
 	let serverAdmin = clientList.response.find((obj) => {
-		return obj.client_type === 1 && obj.client_nickname.match(/^serveradmin/i);
+		return obj.client_type === 1 && obj.client_nickname.match(
+			new RegExp(`^${escapeRegExp(NICKNAME)}`, 'i'));
 	});
 
 	if (serverAdmin) {
@@ -41,6 +44,7 @@ async function main(host, login, password) {
             client_login_name: login,
             client_login_password: password
         });
+        await client.send("clientupdate", {client_nickname: NICKNAME});
         
         // await client.subscribePrivateTextEvents();
 

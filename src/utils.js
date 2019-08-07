@@ -2,10 +2,12 @@ const prompt = require('prompt-sync')();
 
 /** @param {string} str */
 function escapeRegExp(str) {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 module.exports = {
+    escapeRegExp,
+
     /** @param {string} name */
     getArgument(name) {
         for (let arg of process.argv) {

@@ -4,20 +4,28 @@ const speaker = require('speaker');
 
 class AudioHandler {
     
-    /** @param {string} url */
-    constructor(url) {
+    /** @param {string} url
+     * @param {string} clientName
+     */
+    constructor(url, clientName) {
         this.url = url;
+        this.clientName = clientName;
     }
     
     /** @param {Function} onEnd */
     play(onEnd) {
-        let s = stream(this.url)
+        this.s = stream(this.url)
             .pipe(decoder())
             .pipe(new speaker());
         
-        s.on('error',(e) => onEnd(e));
+        this.s.on('error',(e) => onEnd(e));
         //s.on('finish',() => onEnd());
-        s.on('close',() => onEnd());
+        this.s.on('close',() => onEnd());
+    }
+
+    finish() {
+        console.log('skipping');
+        this.s.emit('finish');
     }
 }
 

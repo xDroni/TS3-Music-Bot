@@ -43,11 +43,17 @@ module.exports = {
 				let songUrl = args[0].replace(/^\[URL\]/i, '')
 					.replace(/\[\/URL\]$/i, '');
 				console.log('Song url:', songUrl);
+
+
 				
-				Playlist.add(songUrl);
-				console.log('Added', songUrl, 'to the playlist');
+				Playlist.add(songUrl, `${invokername}`);
+				console.log(`${invokername} added`, songUrl, 'to the playlist');
 				console.log('Playlist size:', Playlist.getSize());
-			}   break;
+				break;
+			}
+			case 'skip': {//skip current song
+				Playlist.skip();
+			}
 		}
 	}
 };

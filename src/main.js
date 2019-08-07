@@ -25,6 +25,12 @@ async function moveAdminTo(client, channel_id) {
 	}
 	else
 		console.error('Music bot or serverAdmin has not been found');
+
+    await client.send('sendtextmessage', {
+        targetmode: 2, //send message to the current channel
+        target: channel_id,
+        msg: "DJ Jaracz joined the party!"
+    });
 }
 
 async function main(host, login, password) {
@@ -79,6 +85,13 @@ async function main(host, login, password) {
         });
 
         let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === "DJ Jaracz");
+
+        const musicBotInfo2 = await client.send('clientinfo', {
+            clid: musicBotInfo.clid
+        });
+
+        console.log(musicBotInfo2);
+
         if(musicBotInfo)
             await moveAdminTo(client, musicBotInfo.cid);
         else
@@ -86,8 +99,11 @@ async function main(host, login, password) {
         
         // listening for client move to other channel
 	    client.on('clientmoved', data => {
-	    	if(musicBotInfo && data[0] && data[0].clid === musicBotInfo.clid)
-	    		moveAdminTo(client, data[0].ctid).catch(console.error);
+	    	if(musicBotInfo && data[0] && data[0].clid === musicBotInfo.clid) {
+                moveAdminTo(client, data[0].ctid).catch(console.error);
+            }
+
+
 	    });
 
         // listening for messages

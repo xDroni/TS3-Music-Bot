@@ -14,7 +14,7 @@ function playNext() {
         return;
     }
     
-    console.log('Playing:', current.url);
+    console.log('Playing:', current.url, 'requested by', current.clientName);
     
     current.play(error => {
         if(error)
@@ -24,13 +24,22 @@ function playNext() {
 }
 
 module.exports = {
-    /** @param {string} song_url */
-    add(song_url) {
-        let audio_handler = new AudioHandler(song_url);
+    /** @param {string} song_url
+     * @param {string} clientName
+     */
+    add(song_url, clientName) {
+        let audio_handler = new AudioHandler(song_url, clientName);
         queue.push( audio_handler );
         
         if( !current )//no song currently playing
             playNext();
+    },
+
+    skip() {
+        if(!current) {
+            console.log('Playlist is empty')
+        } else
+            current.finish();
     },
 
     /*get() {

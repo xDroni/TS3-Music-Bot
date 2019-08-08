@@ -18,11 +18,12 @@ function sendChannelMessage(client, message) {
 	}).catch(console.error);
 }
 
-function addToPlaylist(title, invokerName) {
+function addToPlaylist(title, invokerName, client) {
     youtube.searchVideos(title, 1).then((result) => {
         let title = entities.decode(result[0].title);
         Playlist.add(result[0].url, invokerName, title);
         console.log(invokerName, 'added', title, 'to the playlist');
+        sendChannelMessage(client, invokerName +  ' added ' + title + ' to the playlist');
         console.log('Playlist size:', Playlist.getSize());
     });
 }
@@ -56,18 +57,24 @@ module.exports = {
                     // noinspection RegExpRedundantEscape
                     song = args[0].replace(/^\[URL\]/i, '')
                         .replace(/\[\/URL\]$/i, '');
-                    addToPlaylist(song, invokername);
+                    addToPlaylist(song, invokername, client);
                     break;
                 }
 
 				else {
-                    addToPlaylist(args.join(' '), invokername);
+                    addToPlaylist(args.join(' '), invokername, client);
                     break;
                 }
 			}
 			case 'skip': {//skip current song
 				Playlist.skip();
+				break;
 			}
+            case 'current': {//TODO print current song on the channel
+                sendChannelMessage(client, 'ta funkcja jeszcze nie dziala');
+                break;
+            }
+
 		}
 	}
 };

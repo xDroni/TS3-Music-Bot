@@ -26,11 +26,6 @@ async function moveAdminTo(client, channel_id) {
 	else
 		console.error('Music bot or serverAdmin has not been found');
 
-    await client.send('sendtextmessage', {
-        targetmode: 2, //send message to the current channel
-        target: channel_id,
-        msg: "DJ Jaracz joined the party!"
-    });
 }
 
 async function main(host, login, password) {

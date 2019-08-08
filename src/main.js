@@ -51,7 +51,7 @@ async function main(host, login, password) {
             client_login_password: password
         });
         await client.send("clientupdate", {client_nickname: NICKNAME});
-        
+
         // await client.subscribePrivateTextEvents();
 
         // // register notifications when user sends message on server channel
@@ -68,7 +68,7 @@ async function main(host, login, password) {
         await client.send("servernotifyregister", {
             event: "server"
         });
-        
+
         await client.send("servernotifyregister", {
             event: "channel",
             id: 0 // listen to all channels
@@ -85,12 +85,6 @@ async function main(host, login, password) {
         });
 
         let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === "DJ Jaracz");
-
-        const musicBotInfo2 = await client.send('clientinfo', {
-            clid: musicBotInfo.clid
-        });
-
-        console.log(musicBotInfo2);
 
         if(musicBotInfo)
             await moveAdminTo(client, musicBotInfo.cid);

@@ -6,10 +6,12 @@ class AudioHandler {
     
     /** @param {string} url
      * @param {string} clientName
+     * @param {string} title
      */
-    constructor(url, clientName) {
+    constructor(url, clientName, title) {
         this.url = url;
         this.clientName = clientName;
+        this.title = title
     }
     
     /** @param {Function} onEnd */

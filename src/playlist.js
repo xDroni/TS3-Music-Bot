@@ -14,8 +14,8 @@ function playNext() {
         return;
     }
     
-    console.log('Playing:', current.url, 'requested by', current.clientName);
-    
+    console.log('Playing:', current.title, 'requested by', current.clientName);
+
     current.play(error => {
         if(error)
             console.error(error);
@@ -26,9 +26,10 @@ function playNext() {
 module.exports = {
     /** @param {string} song_url
      * @param {string} clientName
+     * @param {string} title
      */
-    add(song_url, clientName) {
-        let audio_handler = new AudioHandler(song_url, clientName);
+    add(song_url, clientName, title) {
+        let audio_handler = new AudioHandler(song_url, clientName, title);
         queue.push( audio_handler );
         
         if( !current )//no song currently playing

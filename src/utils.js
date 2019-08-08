@@ -1,11 +1,17 @@
 const prompt = require('prompt-sync')();
+const path = require('path');
 
 /** @param {string} str */
 function escapeRegExp(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function getSrcPath() {
+    return path.dirname(process.mainModule.filename);
+}
+
 module.exports = {
+    getSrcPath,
     escapeRegExp,
 
     /** @param {string} name */

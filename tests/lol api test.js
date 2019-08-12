@@ -16,7 +16,7 @@ const leagueJs = new LeagueJS(APIKey);
 let id;
 
 leagueJs.Summoner
-    .gettingByName('test')
+    .gettingByName('summoner')
     .then(data => {
         'use strict';
         // console.log(data);

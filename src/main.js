@@ -91,8 +91,6 @@ async function main(host, login, password) {
 	    	if(musicBotInfo && data[0] && data[0].clid === musicBotInfo.clid) {
                 moveAdminTo(client, data[0].ctid).catch(console.error);
             }
-
-
 	    });
 
         // listening for messages
@@ -100,6 +98,12 @@ async function main(host, login, password) {
             if(data[0])
                 handleMessage(client, data[0]);
         });
+
+        // keeping connection alive every 4 min
+        setInterval( () => {
+            client.send("version");
+        }, 240000);
+
     } catch(err) {
         console.error("An error occurred: ");
         console.error(err);

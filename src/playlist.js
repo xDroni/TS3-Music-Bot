@@ -36,15 +36,24 @@ module.exports = {
             playNext();
     },
 
-    skip() {
+    skipCurrent() {
         if(!current) {
-            console.log('Playlist is empty');
+            console.log('Queue is empty');
             return false;
         } else {
             current.finish();
             return true;
         }
+    },
 
+    skipLast() {
+        if(queue.length === 0) {
+            console.log('Queue is empty');
+            return false;
+        } else {
+            queue.pop();
+            return true;
+        }
     },
 
     /*get() {

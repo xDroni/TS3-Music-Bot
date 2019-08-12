@@ -44,7 +44,7 @@ module.exports = {
 		let [cmd, ...args] = msg.substring(1).split(' ');
         switch(cmd.toLowerCase()) {
 			default:
-				console.log('Unknown command', msg);
+				sendChannelMessage(client, 'Unknown command: ' + msg);
 				break;
 			case 'sr': {// song request
                 let song;
@@ -71,11 +71,20 @@ module.exports = {
 				if(Playlist.getCurrent() !== undefined) {
 					currentInfo = Playlist.getCurrent().title + ' requested by ' + Playlist.getCurrent().clientName;
 				}
-				if(Playlist.skip() === true) {
+				if(Playlist.skipCurrent() === true) {
 					sendChannelMessage(client, 'Skipping ' + currentInfo);
 				}
 				else {
 					sendChannelMessage(client, 'Queue is empty')
+				}
+				break;
+			}
+			case 'skiplast': {//remove the most recent added song from queue
+				if(Playlist.skipLast() === true ) {
+					sendChannelMessage(client, 'Removed the most recent added song');
+				}
+				else {
+					sendChannelMessage(client, 'Queue is empty');
 				}
 				break;
 			}

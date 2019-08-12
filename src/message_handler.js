@@ -42,7 +42,7 @@ module.exports = {
 			return;
 
 		let [cmd, ...args] = msg.substring(1).split(' ');
-        switch(cmd) {
+        switch(cmd.toLowerCase()) {
 			default:
 				console.log('Unknown command', msg);
 				break;

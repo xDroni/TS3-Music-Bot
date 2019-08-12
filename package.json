@@ -24,13 +24,14 @@
   },
   "homepage": "https://github.com/xDroni/TeamSpeak-3-Music-Bot#readme",
   "dependencies": {
+    "html-entities": "latest",
     "lame": "^1.2.4",
+    "leaguejs": "^2.1.0",
     "node-ts": "^5.0.1",
     "prompt-sync": "^4.1.7",
-    "speaker": "^0.4.2",
-    "youtube-audio-stream": "^0.3.1",
     "simple-youtube-api": "latest",
-    "html-entities": "latest"
+    "speaker": "^0.4.2",
+    "youtube-audio-stream": "^0.3.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

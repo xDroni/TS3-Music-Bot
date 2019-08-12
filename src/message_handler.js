@@ -67,14 +67,25 @@ module.exports = {
                 }
 			}
 			case 'skip': {//skip current song
-				Playlist.skip();
+				let currentInfo;
+				if(Playlist.getCurrent() !== undefined) {
+					currentInfo = Playlist.getCurrent().title + ' requested by ' + Playlist.getCurrent().clientName;
+				}
+				if(Playlist.skip() === true) {
+					sendChannelMessage(client, 'Skipping ' + currentInfo);
+				}
+				else {
+					sendChannelMessage(client, 'Queue is empty')
+				}
 				break;
 			}
-            case 'current': {//TODO print current song on the channel
-                sendChannelMessage(client, 'ta funkcja jeszcze nie dziala');
+            case 'current': {
+                sendChannelMessage(client, Playlist.getCurrent().title + ' requested by ' + Playlist.getCurrent().clientName);
                 break;
             }
-
+			case 'size': {
+				sendChannelMessage(client, Playlist.getSize() + ' songs in the queue');
+			}
 		}
 	}
 };

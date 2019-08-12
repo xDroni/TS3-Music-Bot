@@ -1,4 +1,4 @@
-const AudioHandler = require('./yt-audio-stream');
+const AudioHandler = require('./audio-handler');
 
 /** @type {AudioHandler[]} */
 let queue = [];
@@ -38,9 +38,13 @@ module.exports = {
 
     skip() {
         if(!current) {
-            console.log('Playlist is empty')
-        } else
+            console.log('Playlist is empty');
+            return false;
+        } else {
             current.finish();
+            return true;
+        }
+
     },
 
     /*get() {
@@ -54,5 +58,9 @@ module.exports = {
 
     getSize() {
         return queue.length;
+    },
+
+    getCurrent() {
+        return current;
     }
 };

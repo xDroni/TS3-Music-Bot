@@ -1,5 +1,6 @@
 const prompt = require('prompt-sync')();
 const path = require('path');
+const { TeamSpeakClient } = require("node-ts");
 
 /** @param {string} str */
 function escapeRegExp(str) {
@@ -29,5 +30,30 @@ module.exports = {
             process.exit();
             return '';
         }
+    },
+    
+    /**
+     * @param {TeamSpeakClient} client
+     * @param {string} message
+     * */
+    sendChannelMessage(client, message) {
+        client.send('sendtextmessage', {
+            targetmode: 2,//CHANNEL
+            target: 0,//current serveradmin channel
+            msg: message
+        }).catch(console.error);
+    },
+    
+    /**
+     * @param {TeamSpeakClient} client
+     * @param {number} target_id
+     * @param {string} message
+     * */
+    sendPrivateMessage(client, target_id, message) {
+        client.send('sendtextmessage', {
+            targetmode: 1,//CLIENT
+            target: target_id,//current serveradmin channel
+            msg: message
+        }).catch(console.error);
     }
 };

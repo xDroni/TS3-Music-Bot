@@ -1,6 +1,6 @@
 const { TeamSpeakClient } = require("node-ts");
 const { getArgument, escapeRegExp } = require("./utils.js");
-const { handleMessage } = require("./message_handler.js");
+const { handleChannelMessage, handlePrivateMessage } = require("./message_handler.js");
 
 const NICKNAME = 'MusicBot';
 
@@ -49,10 +49,10 @@ async function main(host, login, password) {
 
         // await client.subscribePrivateTextEvents();
 
-        // // register notifications when user sends message on server channel
-        // await client.send("servernotifyregister", {
-        //     event: "textserver"
-        // });
+        // register notifications when user sends private message
+        await client.send("servernotifyregister", {
+            event: "textprivate"
+        });
 
         // register notifications when user sends message on normal channel
         await client.send("servernotifyregister", {
@@ -95,8 +95,12 @@ async function main(host, login, password) {
 
         // listening for messages
         client.on("textmessage", data => {
-            if(data[0])
-                handleMessage(client, data[0]);
+            if( !data[0] || data[0].invokeruid === 'serveradmin' )//ignore messages from serveradmin
+            	return;
+            if( data[0].targetmode === 2 )
+                handleChannelMessage(client, data[0]);
+            else if( data[0].targetmode === 1 )
+            	handlePrivateMessage(client, data[0]);
         });
 
         // keeping connection alive every 4 min

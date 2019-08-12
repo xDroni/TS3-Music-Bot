@@ -1,22 +1,12 @@
 const { TeamSpeakClient } = require("node-ts");
 const Entities = require('html-entities').AllHtmlEntities;
+const { sendChannelMessage } = require('./utils');
+const Hangman = require('./hangman');
 
 const Playlist = require("./playlist");
 const youtube = require('./youtube-api');
 
 const entities = new Entities();
-
-/**
- * @param {TeamSpeakClient} client
- * @param {string} message
- * */
-function sendChannelMessage(client, message) {
-	client.send('sendtextmessage', {
-		targetmode: 2,//CHANNEL
-		target: 0,//current serveradmin channel
-		msg: message
-	}).catch(console.error);
-}
 
 function addToPlaylist(title, invokerName, client) {
     youtube.searchVideos(title, 1).then((result) => {
@@ -25,6 +15,9 @@ function addToPlaylist(title, invokerName, client) {
         console.log(invokerName, 'added', title, 'to the playlist');
         sendChannelMessage(client, invokerName +  ' added ' + title + ' to the playlist');
         console.log('Playlist size:', Playlist.getSize());
+    }).catch(e => {
+    	console.error(e);
+    	sendChannelMessage(client, 'YoutubeApi error');
     });
 }
 
@@ -33,7 +26,7 @@ module.exports = {
 	 * @param {TeamSpeakClient} client
 	 * @param {TextMessageNotificationData} message
 	 * */
-	handleMessage(client, message) {
+	handleChannelMessage(client, message) {
 		let {msg, invokername, invokerid} = message;
 		msg = msg.toString().trim();
 		console.log(`Message received from ${invokername}[${invokerid}]: ${msg}`);
@@ -94,7 +87,34 @@ module.exports = {
             }
 			case 'size': {
 				sendChannelMessage(client, Playlist.getSize() + ' songs in the queue');
-			}
+			}   break;
+			
+	        case 'wisielec':
+	        case 'hangman':
+	        	Hangman.startGame(client, invokerid);
+	        	break;
+		}
+	},
+	
+	/**
+	 * @param {TeamSpeakClient} client
+	 * @param {TextMessageNotificationData} message
+	 * */
+	handlePrivateMessage(client, message) {
+		let {msg, invokername, invokerid} = message;
+		msg = msg.toString().trim();
+		console.log(`Private message received from ${invokername}[${invokerid}]: ${msg}`);
+		
+		let [cmd/*, ...args*/] = msg.substring(1).split(' ');
+		
+		switch(cmd.toLowerCase()) {
+			default:
+				Hangman.onPrivateMessage(invokerid, msg);
+				break;
+			case 'wisielec':
+	        case 'hangman':
+	        	Hangman.startGame(client, invokerid);
+	        	break;
 		}
 	}
 };

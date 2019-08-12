@@ -5,7 +5,7 @@ const path = require('path');
 
 const utils = require('./utils');
 
-// put your YouTube Data v3 APIKey in secrets folder
-const youtube = new YouTube(fs.readFileSync(path.join(utils.getSrcPath(), '..', 'secrets', 'APIKey' ), 'utf-8'));
+// put your YouTube Data v3 GoogleAPIKey in secrets folder
+const youtube = new YouTube(fs.readFileSync(path.join(utils.getSrcPath(), '..', 'secrets', 'GoogleAPIKey' ), 'utf-8'));
 
 module.exports = youtube;

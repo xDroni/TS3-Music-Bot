@@ -1,7 +1,8 @@
 const { TeamSpeakClient } = require("node-ts");
 const Entities = require('html-entities').AllHtmlEntities;
-const { sendChannelMessage } = require('./utils');
+const { sendChannelMessage, championMastery } = require('./utils');
 const Hangman = require('./hangman');
+const LeagueJS = require('./league-api');
 
 const Playlist = require("./playlist");
 const youtube = require('./youtube-api');
@@ -87,12 +88,23 @@ module.exports = {
             }
 			case 'size': {
 				sendChannelMessage(client, Playlist.getSize() + ' songs in the queue');
-			}   break;
+				break;
+			}
 			
 	        case 'wisielec':
 	        case 'hangman':
 	        	Hangman.startGame(client, invokerid);
 	        	break;
+
+			case 'mastery':
+				if(args < 1) {
+					sendChannelMessage(client, 'Summoner name missing');
+					break;
+				}
+				else {
+					championMastery(LeagueJS, args.join(' '));
+					break;
+				}
 		}
 	},
 	

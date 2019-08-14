@@ -1,6 +1,7 @@
 const prompt = require('prompt-sync')();
 const path = require('path');
 const { TeamSpeakClient } = require("node-ts");
+const LeagueJS = require('leaguejs');
 
 /** @param {string} str */
 function escapeRegExp(str) {
@@ -55,5 +56,32 @@ module.exports = {
             target: target_id,//current serveradmin channel
             msg: message
         }).catch(console.error);
+    },
+
+    /**
+     * @param {LeagueJS} leagueJs
+     * @param {string} summonerName
+     * @param {string} region
+     * */
+    championMastery(leagueJs, summonerName, region ='eun1') {
+        leagueJs.Summoner
+            .gettingByName(summonerName, region)
+            .then(data => {
+                leagueJs.ChampionMastery.gettingBySummoner(data.id, region).then(data => {
+                    let championsMap;
+                    leagueJs.StaticData.gettingChampions(region).then(receivedMap => {
+                        championsMap = receivedMap.keys;
+                        for(let i=0; i<5; i++) {//5 best champions
+                            console.log(data[i].championPoints, championsMap[data[i].championId])
+                        }
+                    });
+                }).catch(err => {
+                    console.log(err);
+                })
+            })
+            .catch(err => {
+                'use strict';
+                console.log(err);
+            });
     }
 };

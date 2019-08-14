@@ -63,25 +63,17 @@ module.exports = {
      * @param {string} summonerName
      * @param {string} region
      * */
-    championMastery(leagueJs, summonerName, region ='eun1') {
-        leagueJs.Summoner
-            .gettingByName(summonerName, region)
-            .then(data => {
-                leagueJs.ChampionMastery.gettingBySummoner(data.id, region).then(data => {
-                    let championsMap;
-                    leagueJs.StaticData.gettingChampions(region).then(receivedMap => {
-                        championsMap = receivedMap.keys;
-                        for(let i=0; i<5; i++) {//5 best champions
-                            console.log(data[i].championPoints, championsMap[data[i].championId])
-                        }
-                    });
-                }).catch(err => {
-                    console.log(err);
-                })
-            })
-            .catch(err => {
-                'use strict';
-                console.log(err);
-            });
+    async championMastery(leagueJs, summonerName, region ='eun1') {
+        let data = await leagueJs.Summoner
+            .gettingByName(summonerName, region);
+        let championMastery = await leagueJs.ChampionMastery.gettingBySummoner(data.id, region);
+        let championsMap;
+        let receivedMap = await leagueJs.StaticData.gettingChampions(region);
+        championsMap = receivedMap.keys;
+        let max_digits = championMastery.slice(0, 5).map(ch => ch.championPoints.toString().length).reduce((a,b) => Math.max(a,b));
+        return championMastery.slice(0, 5).map(ch => {
+            let points = ch.championPoints.toString();
+            return points + ''.padEnd((max_digits-points.length)*2 + 1, ' ') + championsMap[ch.championId];
+        });
     }
 };

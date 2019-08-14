@@ -97,12 +97,17 @@ module.exports = {
 	        	break;
 
 			case 'mastery':
-				if(args < 1) {
+				if(args.length < 1) {
 					sendChannelMessage(client, 'Summoner name missing');
 					break;
 				}
 				else {
-					championMastery(LeagueJS, args.join(' '));
+					championMastery(LeagueJS, args.join(' ')).then(data => {
+						sendChannelMessage(client,
+											'\n5 best champions of ' +
+											args.join(' ') + '\n' +
+											data.join('\n'));
+					});
 					break;
 				}
 		}

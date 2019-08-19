@@ -10,6 +10,7 @@ const {
 } = require('./utils');
 const Hangman = require('./hangman');
 const LeagueJS = require('./league-api');
+LeagueJS.updateRateLimiter({allowBursts: true});
 
 const Playlist = require("./playlist");
 const youtube = require('./youtube-api');

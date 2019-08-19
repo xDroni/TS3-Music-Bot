@@ -1,6 +1,13 @@
 const { TeamSpeakClient } = require("node-ts");
 const Entities = require('html-entities').AllHtmlEntities;
-const { sendChannelMessage, championMastery } = require('./utils');
+const {
+	sendChannelMessage,
+	championMastery,
+	getSummonerId,
+	getChampionsMap,
+	getCurrentMatch,
+	getLeague
+} = require('./utils');
 const Hangman = require('./hangman');
 const LeagueJS = require('./league-api');
 
@@ -96,6 +103,7 @@ module.exports = {
 	        	Hangman.startGame(client, invokerid);
 	        	break;
 
+			case 'maestry':
 			case 'mastery':
 				if(args.length < 1) {
 					sendChannelMessage(client, 'Summoner name missing');
@@ -110,6 +118,35 @@ module.exports = {
 					});
 					break;
 				}
+			case 'live':
+				getSummonerId(LeagueJS, args.join(' ')).then(summonerId => {
+					getCurrentMatch(LeagueJS, summonerId).then(activeMatch => {
+						sendChannelMessage(client, activeMatch.gameMode + ' ' + activeMatch.gameType);
+						let output = [];
+						getChampionsMap(LeagueJS).then(championsMap => {
+							activeMatch.participants.forEach(summonerData => {
+								getLeague(LeagueJS, summonerData.summonerId).then(leagueData => {
+									let summonerName = summonerData.summonerName;
+									let champion = '(' + championsMap.keys[summonerData.championId] + ')';
+									let solo = 'RANKED SOLO: UNRANKED';
+									let flex = 'RANKED FLEX: UNRANKED';
+									let tft = 'RANKED TFT: UNRANKED';
+									leagueData.forEach(queue => {
+										if(queue.queueType.includes('SOLO')) solo = solo.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + 'LP');
+										if(queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + 'LP');
+										if(queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + 'LP');
+									});
+									output.push(summonerName.padEnd(30, ' ') + champion.padEnd(20, ' ') + solo.padEnd(40, ' ') + flex.padEnd(40, ' ') + tft.padEnd(40, ' '));
+									if(output.length === activeMatch.participants.length) sendChannelMessage(client, '\n' + output.join('\n'));
+								})
+							})
+						});
+					}).catch(err => {
+						console.log(err);
+						console.log('summoner not ingame');
+					})
+				});
+				break;
 		}
 	},
 	

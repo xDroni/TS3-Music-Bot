@@ -63,7 +63,7 @@ module.exports = {
      * @param {string} summonerName
      * @param {string} region
      * */
-    async championMastery(leagueJs, summonerName, region ='eun1') {
+    async championMastery(leagueJs, summonerName, region = leagueJs.config.PLATFORM_ID) {
         let data = await leagueJs.Summoner
             .gettingByName(summonerName, region);
         let championMastery = await leagueJs.ChampionMastery.gettingBySummoner(data.id, region);
@@ -75,5 +75,50 @@ module.exports = {
             let points = ch.championPoints.toString();
             return points + ''.padEnd((max_digits-points.length)*2 + 1, ' ') + championsMap[ch.championId];
         });
+    },
+
+    /**
+     *
+     * @param {LeagueJS} leagueJs
+     * @param {string} summonerName
+     * @param {string} region
+     * @returns {string} summonerId
+     */
+
+    async getSummonerId(leagueJs, summonerName, region = leagueJs.config.PLATFORM_ID) {
+        let data = await leagueJs.Summoner.gettingByName(summonerName);
+        return data.id;
+    },
+
+    /**
+     *
+     * @param {LeagueJS} leagueJs
+     * @param {string} summonerName
+     * @param {string} region
+     * @returns {Promise<Bluebird<CurrentGameInfo>>}
+     */
+    async getCurrentMatch(leagueJs, summonerName, region = leagueJs.config.PLATFORM_ID) {
+        return leagueJs.Spectator.gettingActiveGame(summonerName);
+    },
+
+    /**
+     *
+     * @param {LeagueJS} leagueJs
+     * @param {string} summonerId
+     * @param {string} region
+     * @returns {Promise<Bluebird<LeagueEntryDTO[]>>}
+     */
+    async getLeague(leagueJs, summonerId, region = leagueJs.config.PLATFORM_ID) {
+        return leagueJs.League.gettingEntriesForSummonerId(summonerId);
+    },
+
+    /**
+     *
+     * @param {LeagueJS} leagueJs
+     * @param {string} region
+     * @returns {Promise<Bluebird<ChampionListDTO<ChampionDTO>>|Bluebird<ChampionListDTO<ChampionFullDTO>>>}
+     */
+    async getChampionsMap(leagueJs, region = leagueJs.config.PLATFORM_ID) {
+        return leagueJs.StaticData.gettingChampions(region);
     }
 };

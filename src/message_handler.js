@@ -129,23 +129,36 @@ module.exports = {
 								getLeague(LeagueJS, summonerData.summonerId).then(leagueData => {
 									let summonerName = summonerData.summonerName;
 									let champion = '(' + championsMap.keys[summonerData.championId] + ')';
-									let solo = 'RANKED SOLO: UNRANKED';
-									let flex = 'RANKED FLEX: UNRANKED';
-									let tft = 'RANKED TFT: UNRANKED';
+									let solo = 'SOLO: UNRANKED';
+									let flex = 'FLEX: UNRANKED';
+									let tft = 'TFT: UNRANKED';
 									leagueData.forEach(queue => {
-										if(queue.queueType.includes('SOLO')) solo = solo.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + 'LP');
-										if(queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + 'LP');
-										if(queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + 'LP');
+										if(queue.queueType.includes('SOLO')) solo = solo.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
+										if(queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
+										if(queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
 									});
-									output.push(summonerName.padEnd(30, ' ') + champion.padEnd(20, ' ') + solo.padEnd(40, ' ') + flex.padEnd(40, ' ') + tft.padEnd(40, ' '));
-									if(output.length === activeMatch.participants.length) sendChannelMessage(client, '\n' + output.join('\n'));
+									output.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
+									if(output.length === activeMatch.participants.length)  {
+										sendChannelMessage(client, '\n' + output.join('\n'));
+										console.log(output.join('\n'));
+									}
 								})
 							})
 						});
 					}).catch(err => {
-						console.log(err);
-						console.log('summoner not ingame');
+						sendChannelMessage(client, 'Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
+						console.error('Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
 					})
+				}).catch(err => {
+					try {
+						let msg = JSON.parse(err.error).status.message;
+						sendChannelMessage(client, 'Error: ' + msg);
+						console.error('Error: ' + msg);
+					} catch(e) {
+						sendChannelMessage(client, err);
+						console.error(err);
+					}
+
 				});
 				break;
 		}

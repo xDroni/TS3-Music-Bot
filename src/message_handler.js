@@ -131,7 +131,8 @@ module.exports = {
 				getSummonerId(LeagueJS, args.join(' ')).then(summonerId => {
 					getCurrentMatch(LeagueJS, summonerId).then(activeMatch => {
 						sendChannelMessage(client, activeMatch.gameMode + ' ' + activeMatch.gameType);
-						let output = [];
+                        let team1 = [];
+                        let team2 = [];
 						getChampionsMap(LeagueJS).then(championsMap => {
 							activeMatch.participants.forEach(summonerData => {
 								getLeague(LeagueJS, summonerData.summonerId).then(leagueData => {
@@ -145,10 +146,12 @@ module.exports = {
 										if(queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
 										if(queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
 									});
-									output.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
-									if(output.length === activeMatch.participants.length)  {
-										sendChannelMessage(client, '\n' + output.join('\n'));
-										console.log(output.join('\n'));
+
+                                    if(summonerData.teamId === 100) team1.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
+                                    else if(summonerData.teamId === 200) team2.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
+                                    if(team1.length + team2.length === activeMatch.participants.length)  {
+										sendChannelMessage(client, '\n' + team1.join('\n') + '\n' + ''.padStart(185, '-') + '\n' + team2.join('\n'));
+										console.log(team1.join('\n') + '\n\n' + team2.join('\n'));
 									}
 								})
 							})

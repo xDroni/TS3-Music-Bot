@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
 const replace = require('replace-in-file');
+const PropertiesReader = require('properties-reader');
 const { TeamSpeakClient } = require("node-ts");
 const LeagueJS = require('leaguejs');
 
@@ -50,6 +51,12 @@ function appendToFile(path, value) {
     processLineByLine(path).then(res => console.log(res));
 }
 
+function writeFile(path, value) {
+    let stream = fs.createWriteStream(path, {flags: 'w'});
+    stream.write(value.toString() + '\n');
+    stream.end();
+}
+
 async function replaceInFile(path, searchValue, replaceValue) {
     const options = {
         files: path,
@@ -65,12 +72,26 @@ async function replaceInFile(path, searchValue, replaceValue) {
     }
 }
 
+function getProperty(path, propertyName) {
+    let properties = PropertiesReader(path);
+    return properties.get(propertyName);
+}
+
+async function setProperty(path, propertyName, value) {
+    let properties = PropertiesReader(path);
+    properties.set(propertyName, value);
+    return await properties.save(path);
+}
+
 module.exports = {
     getSrcPath,
     escapeRegExp,
     processLineByLine,
     appendToFile,
+    writeFile,
     replaceInFile,
+    setProperty,
+    getProperty,
 
     /** @param {string} name */
     getArgument(name) {
@@ -142,7 +163,7 @@ module.exports = {
      */
 
     async getSummonerId(leagueJs, summonerName, region = leagueJs.config.PLATFORM_ID) {
-        let data = await leagueJs.Summoner.gettingByName(summonerName);
+        let data = await leagueJs.Summoner.gettingByName(summonerName, region);
         return data.id;
     },
 
@@ -154,7 +175,7 @@ module.exports = {
      * @returns {Promise<Bluebird<CurrentGameInfo>>}
      */
     async getCurrentMatch(leagueJs, summonerName, region = leagueJs.config.PLATFORM_ID) {
-        return leagueJs.Spectator.gettingActiveGame(summonerName);
+        return leagueJs.Spectator.gettingActiveGame(summonerName, region);
     },
 
     /**
@@ -165,7 +186,7 @@ module.exports = {
      * @returns {Promise<Bluebird<LeagueEntryDTO[]>>}
      */
     async getLeague(leagueJs, summonerId, region = leagueJs.config.PLATFORM_ID) {
-        return leagueJs.League.gettingEntriesForSummonerId(summonerId);
+        return leagueJs.League.gettingEntriesForSummonerId(summonerId, region);
     },
 
     /**

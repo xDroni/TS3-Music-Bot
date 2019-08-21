@@ -14,8 +14,13 @@ const {
 	processLineByLine,
 	getSrcPath,
 	appendToFile,
-	replaceInFile
+	writeFile,
+	replaceInFile,
+	setProperty,
+	getProperty
 } = require('./utils');
+const propertiesPath = path.join(getSrcPath(), 'leagueFiles', 'properties');
+const leagueFilesPath = path.join(getSrcPath(), 'leagueFiles');
 const Hangman = require('./hangman');
 const LeagueJS = require('./league-api');
 LeagueJS.updateRateLimiter({allowBursts: true});
@@ -209,7 +214,8 @@ module.exports = {
 						sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}.`);
 					}
                     else if(summonerNameToCompare !== undefined && csToCompare === undefined) {
-                    	if(summonerNameExact === summonerNameToCompare) {
+                    	if(summonerNameExact.toLowerCase() === summonerNameToCompare.toLowerCase()) {
+							await replaceInFile(csComparePath, summonerNameToCompare, summonerNameExact).catch(err => { console.log(err); sendChannelMessage(client, err)});
                     		appendToFile(csComparePath, avgCs);
 							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}. Updated`);
 						}
@@ -218,17 +224,43 @@ module.exports = {
 						}
 					}
                     else if(summonerNameToCompare !== undefined && csToCompare !== undefined) {
-						if(summonerNameExact === summonerNameToCompare) {
-							await replaceInFile(csComparePath, csToCompare, avgCs).catch(err => console.log(err));
+						if(summonerNameExact.toLowerCase() === summonerNameToCompare.toLowerCase()) {
+							await replaceInFile(csComparePath, csToCompare, avgCs).catch(err => { console.log(err); sendChannelMessage(client, err)});
 							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}. Updated`);
 						}
 						else {
 							let diff = Math.round(Math.abs(avgCs - csToCompare) / ((Number(avgCs) + Number(csToCompare)) / 2) * 1000) / 10;
-							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}, it's ${diff}% ${avgCs > csToCompare ? 'better' : 'worse'} than Droni! Droni has avg ${csToCompare}cs/min`);
+							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}, it's ${diff}% ${avgCs > csToCompare ? 'better' : 'worse'} than ${summonerNameToCompare}! ${summonerNameToCompare} has average ${csToCompare}cs/min`);
 						}
 					}
                 })();
                 break;
+			case 'properties':
+				processLineByLine(propertiesPath).then(res => {
+					sendChannelMessage(client, '\n' + res.join('\n'));
+					sendChannelMessage(client, 'To change property, use this syntax: !propertiesSet property value');
+					sendChannelMessage(client, 'Example: !propertiesSet region eune');
+				});
+				break;
+			case 'propertiesset':
+				if(args.length < 2) {
+					sendChannelMessage(client, `Invalid number of arguments, expected 2 or more, received ${args.length}`);
+				} else {
+					if(getProperty(propertiesPath, args[0]) !== null) {
+						setProperty(propertiesPath, args[0], args.slice(1, args.length).join(' ')).then(res => {
+							if(args[0].includes('csCompare')) {
+								writeFile(path.join(leagueFilesPath, 'cs-compare'), args.slice(1, args.length).join(' '));
+							}
+							console.log(`Changed property. Properties are now:\n${res}`);
+							sendChannelMessage(client,`Changed property. Properties are now:\n${res}`);
+						});
+					}
+					else {
+						sendChannelMessage(client, `Error: '${args[0]}' property cannot be found in the properties file.`);
+						console.error(`Error: '${args[0]}' property cannot be found in the properties file.`);
+					}
+				}
+				break;
 		}
 	},
 	

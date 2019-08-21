@@ -1,7 +1,19 @@
 const prompt = require('prompt-sync')();
 const path = require('path');
+const fs = require('fs');
+const readline = require('readline');
+const replace = require('replace-in-file');
 const { TeamSpeakClient } = require("node-ts");
 const LeagueJS = require('leaguejs');
+
+const queuesMap = {
+    0:      'Custom game',
+    400:    'Summoner\'s Rift 5v5 Draft Pick',
+    420:    'Summoner\'s Rift 5v5 Ranked Solo',
+    430:    'Summoner\'s Rift 5v5 Blind Pick',
+    440:    'Summoner\'s Rift 5v5 Ranked Flex',
+    450:    'Howling Abyss 5v5 ARAM'
+};
 
 /** @param {string} str */
 function escapeRegExp(str) {
@@ -12,9 +24,53 @@ function getSrcPath() {
     return path.dirname(process.mainModule.filename);
 }
 
+async function processLineByLine(path) {
+    const fileStream = fs.createReadStream(path);
+
+    const rl = readline.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity
+    });
+    // Note: we use the crlfDelay option to recognize all instances of CR LF
+    // ('\r\n') in input.txt as a single line break.
+
+    let output = [];
+    for await (const line of rl) {
+        // Each line in input.txt will be successively available here as `line`.
+        console.log(`Line from file: ${line}`);
+        output.push(line);
+    }
+    return output;
+}
+
+function appendToFile(path, value) {
+    let stream = fs.createWriteStream(path, {flags: 'a'});
+    stream.write(value.toString() + '\n');
+    stream.end();
+    processLineByLine(path).then(res => console.log(res));
+}
+
+async function replaceInFile(path, searchValue, replaceValue) {
+    const options = {
+        files: path,
+        from: searchValue,
+        to: replaceValue,
+    };
+    try {
+        const results = await replace(options);
+        console.log('Replacement results:', results);
+    }
+    catch (err) {
+        console.error('Error occurred with replacing file: ', err);
+    }
+}
+
 module.exports = {
     getSrcPath,
     escapeRegExp,
+    processLineByLine,
+    appendToFile,
+    replaceInFile,
 
     /** @param {string} name */
     getArgument(name) {
@@ -120,5 +176,28 @@ module.exports = {
      */
     async getChampionsMap(leagueJs, region = leagueJs.config.PLATFORM_ID) {
         return leagueJs.StaticData.gettingChampions(region);
+    },
+
+    async getAccountId(leagueJs, summonerName, region = leagueJs.config.PLATFORM_ID) {
+        let data = await leagueJs.Summoner.gettingByName(summonerName, region);
+        return data.accountId;
+    },
+
+    async getMatchById(leagueJs, matchId, region = leagueJs.config.PLATFORM_ID) {
+        return leagueJs.Match.gettingById(matchId, region);
+    },
+
+    async getMatchListById(leagueJs, accountId, region = leagueJs.config.PLATFORM_ID) {
+        let riftCodes = [];
+        Object.entries(queuesMap).filter(entry => {
+            return (entry[1].includes('Rift'))
+        }).forEach(v => {
+            riftCodes.push(v[0])
+        });
+
+        return leagueJs.Match.gettingListByAccount(accountId, region, {
+            queue: riftCodes,
+            endIndex: 10
+        });
     }
 };

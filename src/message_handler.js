@@ -1,12 +1,20 @@
 const { TeamSpeakClient } = require("node-ts");
 const Entities = require('html-entities').AllHtmlEntities;
+const path = require('path');
 const {
 	sendChannelMessage,
 	championMastery,
 	getSummonerId,
 	getChampionsMap,
 	getCurrentMatch,
-	getLeague
+	getLeague,
+    getAccountId,
+    getMatchById,
+    getMatchListById,
+	processLineByLine,
+	getSrcPath,
+	appendToFile,
+	replaceInFile
 } = require('./utils');
 const Hangman = require('./hangman');
 const LeagueJS = require('./league-api');
@@ -161,6 +169,63 @@ module.exports = {
 
 				});
 				break;
+            case 'cs':
+                (async () => {
+					let summonerNameToCompare, csToCompare;
+					let csComparePath = path.join(getSrcPath(), 'leagueFiles', 'cs-compare');
+					const array = await processLineByLine(csComparePath).catch(err => console.log(err));
+					if(array !== undefined && array.length >= 1) {
+						if(array.length === 1) summonerNameToCompare = array[0];
+						else if(array.length === 2) {
+							summonerNameToCompare = array[0];
+							csToCompare = array[1];
+						}
+					}
+                    const summonerNameFromArgs = args.join(' ');
+                    let summonerNameExact;
+                    let accountId = await getAccountId(LeagueJS, summonerNameFromArgs).catch(err => sendChannelMessage(client, err));
+                    let matchList = await getMatchListById(LeagueJS, accountId).catch(err => sendChannelMessage(client, err));
+
+                    let sum = 0, count = 0;
+                    for(let match of matchList.matches) {
+                        let res = await getMatchById(LeagueJS, match.gameId).catch(err => sendChannelMessage(client, err));
+                        for(let index=0; index<res.participants.length; index++) {
+                            if( match.role.includes('SUPPORT') )
+                                continue;
+                            if( res.participantIdentities[index].player.summonerName.toLowerCase() === summonerNameFromArgs.toLowerCase() ) {
+                                if(summonerNameExact === undefined) summonerNameExact = res.participantIdentities[index].player.summonerName;
+                                sum += Math.round(((res.participants[index].stats.totalMinionsKilled +
+                                    res.participants[index].stats.neutralMinionsKilled) / (res.gameDuration / 60)) * 100) / 100;
+                                count++;
+                                break;
+                            }
+                        }
+                    }
+					let avgCs = Math.round((sum / count) * 100) / 100;
+					if(summonerNameToCompare === undefined && csToCompare === undefined) {
+						sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}.`);
+					}
+                    else if(summonerNameToCompare !== undefined && csToCompare === undefined) {
+                    	if(summonerNameExact === summonerNameToCompare) {
+                    		appendToFile(csComparePath, avgCs);
+							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}. Updated`);
+						}
+                    	else {
+							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}.`);
+						}
+					}
+                    else if(summonerNameToCompare !== undefined && csToCompare !== undefined) {
+						if(summonerNameExact === summonerNameToCompare) {
+							await replaceInFile(csComparePath, csToCompare, avgCs).catch(err => console.log(err));
+							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}. Updated`);
+						}
+						else {
+							let diff = Math.round(Math.abs(avgCs - csToCompare) / ((Number(avgCs) + Number(csToCompare)) / 2) * 1000) / 10;
+							sendChannelMessage(client,`Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}, it's ${diff}% ${avgCs > csToCompare ? 'better' : 'worse'} than Droni! Droni has avg ${csToCompare}cs/min`);
+						}
+					}
+                })();
+                break;
 		}
 	},
 	

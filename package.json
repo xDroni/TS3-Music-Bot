@@ -27,6 +27,7 @@
     "html-entities": "latest",
     "lame": "^1.2.4",
     "leaguejs": "^2.1.0",
+    "mongodb": "^3.3.0",
     "node-ts": "^5.0.1",
     "prompt-sync": "^4.1.7",
     "properties-reader": "^0.3.1",

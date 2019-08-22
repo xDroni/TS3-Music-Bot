@@ -8,7 +8,9 @@ async function welcomeMessage(client, data) {
     let clientInfo = await client.send('clientinfo', {
         clid: data.clid
     });
+    console.log(clientInfo);
     clientInfo = clientInfo.response[0];
+
     if(data.client_type !== 1) {
         let firstConnected = new Date(clientInfo.client_created * 1000);
         let lastConnected = new Date(clientInfo.client_lastconnected * 1000);
@@ -108,6 +110,11 @@ async function main(host, login, password) {
             welcomeMessage(client, data[0])
         });
 
+        // listening for client to disconnect from the server
+        // await client.on('clientleftview', data => {
+        //     console.log(`Client disconnected.`);
+        // });
+
         let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === "DJ Jaracz");
 
         if(musicBotInfo)
@@ -135,6 +142,11 @@ async function main(host, login, password) {
         // keeping connection alive every 4 min
         setInterval( () => {
             client.send("version");
+            // client.send("clientlist").then(clientlist => {
+            //     clientlist.response.forEach(client => {
+            //         console.log(client.client_nickname);
+            //     });
+            // });
         }, 240000);
 
     } catch(err) {

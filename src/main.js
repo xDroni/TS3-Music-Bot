@@ -1,8 +1,33 @@
 const { TeamSpeakClient } = require("node-ts");
-const { getArgument, escapeRegExp } = require("./utils.js");
+const { getArgument, escapeRegExp, sendPrivateMessage } = require("./utils.js");
 const { handleChannelMessage, handlePrivateMessage } = require("./message_handler.js");
 
 const NICKNAME = 'MusicBot';
+
+async function welcomeMessage(client, data) {
+    let clientInfo = await client.send('clientinfo', {
+        clid: data.clid
+    });
+    clientInfo = clientInfo.response[0];
+    if(data.client_type !== 1) {
+        let firstConnected = new Date(clientInfo.client_created * 1000);
+        let lastConnected = new Date(clientInfo.client_lastconnected * 1000);
+        // let connectedTime = new Date(clientInfo.connection_connected_time); ///TODO: save and update connectedTime
+
+        sendPrivateMessage(client, data.clid,
+            `\n[b][color=#5D77FF]Hello ${clientInfo.client_nickname}![/color][/b]`
+                    + `\nYour first connection: ${firstConnected.getFullYear()}-${firstConnected.getMonth() < 10 ? '0' + firstConnected.getMonth() : firstConnected.getMonth()}-${firstConnected.getDay() < 10 ? '0' + firstConnected.getDay() : firstConnected.getDay()} at ${firstConnected.getHours() < 10 ? '0' + firstConnected.getHours() : firstConnected.getHours()} ${firstConnected.getMinutes() < 10 ? '0' + firstConnected.getMinutes() : firstConnected.getMinutes()}`
+                    + `\nYour last connection: ${lastConnected.getFullYear()}-${lastConnected.getMonth()  < 10 ? '0' + lastConnected.getMonth() : lastConnected.getMonth()}-${lastConnected.getDay()  < 10 ? '0' + lastConnected.getDay() : lastConnected.getDay()} at ${lastConnected.getHours() < 10 ? '0' + lastConnected.getHours() : lastConnected.getHours()} ${lastConnected.getMinutes() < 10 ? '0' + lastConnected.getMinutes() : lastConnected.getMinutes()}`
+                    + `\nIt's your ${clientInfo.client_totalconnections} visit here!`
+                    + `\nHave Fun! :D`);
+        console.log(`clid: ${data.clid}`
+            + `\nWelcome ${clientInfo.client_nickname}!`
+            + `\nYour first connection: ${firstConnected.getFullYear()}-${firstConnected.getMonth() < 10 ? '0' + firstConnected.getMonth() : firstConnected.getMonth()}-${firstConnected.getDay() < 10 ? '0' + firstConnected.getDay() : firstConnected.getDay()} at ${firstConnected.getHours() < 10 ? '0' + firstConnected.getHours() : firstConnected.getHours()} ${firstConnected.getMinutes() < 10 ? '0' + firstConnected.getMinutes() : firstConnected.getMinutes()}`
+            + `\nYour last connection: ${lastConnected.getFullYear()}-${lastConnected.getMonth()  < 10 ? '0' + lastConnected.getMonth() : lastConnected.getMonth()}-${lastConnected.getDay()  < 10 ? '0' + lastConnected.getDay() : lastConnected.getDay()} at ${lastConnected.getHours() < 10 ? '0' + lastConnected.getHours() : lastConnected.getHours()} ${lastConnected.getMinutes() < 10 ? '0' + lastConnected.getMinutes() : lastConnected.getMinutes()}`
+            + `\nIt's your ${clientInfo.client_totalconnections} visit here!`
+            + `\nHave Fun! :D`);
+    }
+}
 
 /**
  * @param {TeamSpeakClient} client
@@ -25,7 +50,6 @@ async function moveAdminTo(client, channel_id) {
 	}
 	else
 		console.error('Music bot or serverAdmin has not been found');
-
 }
 
 async function main(host, login, password) {
@@ -79,13 +103,18 @@ async function main(host, login, password) {
             }
         });
 
+        // listening for client to connect to the server
+        await client.on('cliententerview', data => {
+            welcomeMessage(client, data[0])
+        });
+
         let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === "DJ Jaracz");
 
         if(musicBotInfo)
             await moveAdminTo(client, musicBotInfo.cid);
         else
         	console.error('DJ Jaracz not found');
-        
+
         // listening for client move to other channel
 	    client.on('clientmoved', data => {
 	    	if(musicBotInfo && data[0] && data[0].clid === musicBotInfo.clid) {

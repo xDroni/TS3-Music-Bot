@@ -21,6 +21,21 @@ function escapeRegExp(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// https://stackoverflow.com/a/19700358
+function msToTime(duration) {
+    let seconds = Math.floor((duration / 1000) % 60),
+        minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24),
+        days = Math.floor(duration / (1000 * 60 * 60 * 24));
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+    days = (days < 10) ? "0" + days : days;
+
+    return days + " days " + hours + " hours " + minutes + " minutes " + seconds + " seconds";
+}
+
 function getSrcPath() {
     return path.dirname(process.mainModule.filename);
 }
@@ -83,8 +98,52 @@ async function setProperty(path, propertyName, value) {
     return await properties.save(path);
 }
 
+async function mongoInsertDocuments(db, collectionName, params) {
+    // Get the documents collection
+    const collection = db.collection(collectionName);
+    // Insert some documents
+    await collection.insertMany([
+        params
+    ], function(err) {
+        if(err !== null) {
+            console.error(err)
+        } else {
+            console.log('Inserted document into the collection', params);
+        }
+    });
+}
+
+async function mongoFindOne(db, collectionName, params)  {
+    // Get the documents collection
+    const collection = db.collection(collectionName);
+    // Find some documents
+    return collection.findOne(params)
+}
+
+async function mongoFind(db, collectionName, params) {
+    // Get the documents collection
+    const collection = db.collection(collectionName);
+    // Find some documents
+    return collection.find(params).toArray();
+}
+
+async function mongoUpdateDocument(db, collectionName, filter, update) {
+    // Get the documents collection
+    const collection = db.collection(collectionName);
+
+    await collection.updateOne(filter, { $set: update },
+        function(err, result) {
+            if(err !== null) {
+                console.error(err)
+            } else {
+                console.log('Updated the document', result.result, filter, update);
+            }
+        });
+}
+
 module.exports = {
     getSrcPath,
+    msToTime,
     escapeRegExp,
     processLineByLine,
     appendToFile,
@@ -92,6 +151,10 @@ module.exports = {
     replaceInFile,
     setProperty,
     getProperty,
+    mongoInsertDocuments,
+    mongoFindOne,
+    mongoUpdateDocument,
+    mongoFind,
 
     /** @param {string} name */
     getArgument(name) {

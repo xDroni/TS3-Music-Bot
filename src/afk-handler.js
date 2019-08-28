@@ -43,7 +43,6 @@ async function moveAFK(client, clientList, clid, cid) {
                    clid: clid, //client id
                    cid: cid //channel id to move back
                 });
-                console.log(AFKClients);
                 console.log(`${userToMove.client_nickname} moved to AFK channel, clid: ${AFKRoomCid}`);
                 sendPrivateMessage(client, clid, `You have been moved to the AFK Room`);
             }
@@ -60,13 +59,10 @@ async function AFKChannelListener(client) {
         });
 
         if(clientToMove !== undefined) {
-            console.log(`clienttomove!=undefined`);
             const AFKClient = AFKClients.find((obj) => obj.clid === clientToMove.clid);
             if(AFKClient !== undefined) {
-                console.log(AFKClient);
                 await moveAFKBack(client, clientToMove.clid, AFKClient.cid);
                 AFKClients = AFKClients.filter(obj => obj.clid !== clientToMove.clid);
-                console.log(`afk clients: `, AFKClients);
             }
         }
     }

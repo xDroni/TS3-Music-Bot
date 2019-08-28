@@ -185,12 +185,12 @@ async function main(host, login, password) {
         // AFK checking every 30 seconds
         setInterval( () => {
             AFKCheck(client);
-        }, 10000);
+        }, 30000);
 
-        // AFK channel checking to bring users back
+        // AFK channel checking every 3 seconds to move users back
         setInterval( () => {
             AFKChannelListener(client);
-        }, 9000);
+        }, 3000);
 
     } catch(err) {
         console.error("An error occurred: ");

@@ -30,7 +30,10 @@ git clone https://github.com/xDroni/TeamSpeak-3-Music-Bot-Node-JS.git
 ```
 npm install
 ```
-### Step 3 
+### Step 3
+- Copy your API keys to the appropriate files in the secrets folder
+
+### Step 4 
 - Run the Music Bot with parameters
 ```
 npm start host="server_address" login="query_login" password="query_password"

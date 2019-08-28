@@ -6,28 +6,30 @@ let AFKClients = [];
 
 async function getAFKChannel(client) {
     const channellist = await client.send('channellist');
-    for(let k in channellist.response) {
+    for(let k=0; k<channellist.response.length; k++) {
         let channelinfo = await client.send('channelinfo', {cid: channellist.response[k].cid});
         if(channelinfo.response[0].channel_topic === 'AFK ROOM') {
-            console.log(`Afk room cid: ${channellist.response[k].cid}`);
+            //console.log(`Afk room cid: ${channellist.response[k].cid}`);
             AFKRoomCid = channellist.response[k].cid;
             return channellist.response[k].cid;
         }
     }
-    throw('AFK Channel not found');
+    throw new Error('AFK Channel not found');
 }
 
 async function AFKCheck(client) {
     const clientlist = await client.send('clientlist');
-    for(let k in clientlist.response) {
-        await client.send('clientinfo', { clid: clientlist.response[k].clid }).then(clientinfo => {
-            if(clientinfo.response != null) {
-                const info = clientinfo.response[0];
-                if(info.client_type == 0 && info.client_idle_time > 10000 && (info.client_output_muted == 1 || info.client_away == 1)) {
-                    moveAFK(client, clientlist, clientlist.response[k].clid, clientlist.response[k].cid)
-                }
+    for(let k=0; k<clientlist.response.length; k++) {
+        let clientinfo = await client.send('clientinfo', { clid: clientlist.response[k].clid }).catch(console.error);
+        if (clientinfo.response !== null && clientinfo.response.length > 0) {
+            const info = clientinfo.response[0];
+            // noinspection JSUnresolvedVariable
+            if (info.client_type === 0 && info.client_idle_time > 10000 &&
+                (info.client_output_muted === 1 || info.client_away === 1))
+            {
+                await moveAFK(client, clientlist, clientlist.response[k].clid, clientlist.response[k].cid);
             }
-        }).catch(err => console.log(err))
+        }
     }
 }
 
@@ -53,9 +55,22 @@ async function moveAFK(client, clientList, clid, cid) {
 async function AFKChannelListener(client) {
     if(AFKRoomCid !== undefined) {
         const clientlist = await client.send("clientlist", {'-voice': '', '-away': ''});
+        
+        for(let obj of clientlist.response) {
+            if( obj.cid === AFKRoomCid && obj.client_output_muted === 0 && obj.client_away === 0 &&
+                AFKClients.some(e => e.clid === obj.clid) )
+            {
+                const AFKClientIndex = AFKClients.findIndex((obj) => obj.clid === obj.clid);
+                if(AFKClientIndex !== -1) {
+                    await moveAFKBack(client, obj.clid, AFKClients[AFKClientIndex].cid);
+                    AFKClients.splice(AFKClientIndex, 1);
+                }
+            }
+        }
 
-        const clientToMove = clientlist.response.find((obj) => {
-            return obj.cid === AFKRoomCid && obj.client_output_muted === 0 && obj.client_away === 0 && AFKClients.some(e => e.clid === obj.clid);
+        /*const clientToMove = clientlist.response.find((obj) => {
+            return obj.cid === AFKRoomCid && obj.client_output_muted === 0 && obj.client_away === 0 &&
+                AFKClients.some(e => e.clid === obj.clid);
         });
 
         if(clientToMove !== undefined) {
@@ -64,12 +79,12 @@ async function AFKChannelListener(client) {
                 await moveAFKBack(client, clientToMove.clid, AFKClient.cid);
                 AFKClients = AFKClients.filter(obj => obj.clid !== clientToMove.clid);
             }
-        }
+        }*/
     }
 }
 
 async function moveAFKBack(client, clid, cid) {
-    client.send('clientmove', {clid: clid, cid: cid});
+    await client.send('clientmove', {clid: clid, cid: cid});
     sendPrivateMessage(client, clid, `Welcome back`);
 }
 

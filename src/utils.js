@@ -92,53 +92,10 @@ function getProperty(path, propertyName) {
     return properties.get(propertyName);
 }
 
-async function setProperty(path, propertyName, value) {
+function setProperty(path, propertyName, value) {
     let properties = PropertiesReader(path);
     properties.set(propertyName, value);
-    return await properties.save(path);
-}
-
-async function mongoInsertDocuments(db, collectionName, params) {
-    // Get the documents collection
-    const collection = db.collection(collectionName);
-    // Insert some documents
-    await collection.insertMany([
-        params
-    ], function(err) {
-        if(err !== null) {
-            console.error(err)
-        } else {
-            console.log('Inserted document into the collection');
-        }
-    });
-}
-
-async function mongoFindOne(db, collectionName, params)  {
-    // Get the documents collection
-    const collection = db.collection(collectionName);
-    // Find some documents
-    return collection.findOne(params)
-}
-
-async function mongoFind(db, collectionName, params) {
-    // Get the documents collection
-    const collection = db.collection(collectionName);
-    // Find some documents
-    return collection.find(params).toArray();
-}
-
-async function mongoUpdateDocument(db, collectionName, filter, update) {
-    // Get the documents collection
-    const collection = db.collection(collectionName);
-
-    await collection.updateOne(filter, { $set: update },
-        function(err, result) {
-            if(err !== null) {
-                console.error(err)
-            } else {
-                console.log('Updated the document');
-            }
-        });
+    return properties.save(path);
 }
 
 module.exports = {
@@ -151,10 +108,6 @@ module.exports = {
     replaceInFile,
     setProperty,
     getProperty,
-    mongoInsertDocuments,
-    mongoFindOne,
-    mongoUpdateDocument,
-    mongoFind,
 
     /** @param {string} name */
     getArgument(name) {

@@ -133,61 +133,73 @@ module.exports = {
 					break;
 				}
 			case 'live':
-				getSummonerId(LeagueJS, args.join(' ')).then(summonerId => {
-					getCurrentMatch(LeagueJS, summonerId).then(activeMatch => {
-						sendChannelMessage(client, activeMatch.gameMode + ' ' + activeMatch.gameType);
-                        let team1 = [];
-                        let team2 = [];
-						getChampionsMap(LeagueJS).then(championsMap => {
-							activeMatch.participants.forEach(summonerData => {
-								getLeague(LeagueJS, summonerData.summonerId).then(leagueData => {
-									let summonerName = summonerData.summonerName;
-									let champion = '(' + championsMap.keys[summonerData.championId] + ')';
-									let solo = 'SOLO: UNRANKED';
-									let flex = 'FLEX: UNRANKED';
-									let tft = 'TFT: UNRANKED';
-									leagueData.forEach(queue => {
-										if(queue.queueType.includes('SOLO')) solo = solo.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
-										if(queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
-										if(queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
-									});
-
-                                    if(summonerData.teamId === 100) team1.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
-                                    else if(summonerData.teamId === 200) team2.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
-                                    if(team1.length + team2.length === activeMatch.participants.length)  {
-										sendChannelMessage(client, '\n' + team1.join('\n') + '\n' + ''.padStart(185, '-') + '\n' + team2.join('\n'));
-										console.log(team1.join('\n') + '\n\n' + team2.join('\n'));
-									}
-								})
-							})
-						});
-					}).catch(err => {
-						sendChannelMessage(client, 'Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
-						console.error('Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
-					})
-				}).catch(err => {
+				(async () => {
 					try {
-						let msg = JSON.parse(err.error).status.message;
-						sendChannelMessage(client, 'Error: ' + msg);
-						console.error('Error: ' + msg);
-					} catch(e) {
-						sendChannelMessage(client, err);
-						console.error(err);
+						let summonerId = await getSummonerId(LeagueJS, args.join(' '));
+						let activeMatch = await getCurrentMatch(LeagueJS, summonerId);
+						try {
+							sendChannelMessage(client, activeMatch.gameMode + ' ' + activeMatch.gameType);
+							let team1 = [];
+							let team2 = [];
+							
+							let championsMap = await getChampionsMap(LeagueJS);
+							
+							for (const summonerData of activeMatch.participants) {
+								let leagueData = await getLeague(LeagueJS, summonerData.summonerId);
+								
+								let summonerName = summonerData.summonerName;
+								let champion = '(' + championsMap.keys[summonerData.championId] + ')';
+								let solo = 'SOLO: UNRANKED';
+								let flex = 'FLEX: UNRANKED';
+								let tft = 'TFT: UNRANKED';
+								leagueData.forEach(queue => {
+									if (queue.queueType.includes('SOLO')) solo = solo.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
+									if (queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
+									if (queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
+								});
+								
+								if (summonerData.teamId === 100) team1.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
+								else if (summonerData.teamId === 200) team2.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
+								if (team1.length + team2.length === activeMatch.participants.length) {
+									sendChannelMessage(client, '\n' + team1.join('\n') + '\n' + ''.padStart(185, '-') + '\n' + team2.join('\n'));
+									console.log(team1.join('\n') + '\n\n' + team2.join('\n'));
+								}
+								
+							}
+						}
+						catch(err) {
+							sendChannelMessage(client, 'Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
+							console.error('Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
+						}
 					}
-
-				});
+					catch(err) {
+						try {
+							let msg = JSON.parse(err.error).status.message;
+							sendChannelMessage(client, 'Error: ' + msg);
+							console.error('Error: ' + msg);
+						} catch (e) {
+							sendChannelMessage(client, err);
+							console.error(err);
+						}
+					}
+				})();
 				break;
             case 'cs':
                 (async () => {
 					let summonerNameToCompare, csToCompare;
 					let csComparePath = path.join(getSrcPath(), 'leagueFiles', 'cs-compare');
-					const array = await processLineByLine(csComparePath).catch(err => console.log(err));
-					if(array !== undefined && array.length >= 1) {
-						if(array.length === 1) summonerNameToCompare = array[0];
-						else if(array.length === 2) {
-							summonerNameToCompare = array[0];
-							csToCompare = array[1];
+					try {
+						const array = await processLineByLine(csComparePath);
+						if (array !== undefined && array.length >= 1) {
+							if (array.length === 1) summonerNameToCompare = array[0];
+							else if (array.length === 2) {
+								summonerNameToCompare = array[0];
+								csToCompare = array[1];
+							}
 						}
+					}
+					catch(e) {
+						console.error(e);
 					}
                     const summonerNameFromArgs = args.join(' ');
                     let summonerNameExact;

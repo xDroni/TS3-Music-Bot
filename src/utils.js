@@ -108,7 +108,7 @@ async function mongoInsertDocuments(db, collectionName, params) {
         if(err !== null) {
             console.error(err)
         } else {
-            console.log('Inserted document into the collection', params);
+            console.log('Inserted document into the collection');
         }
     });
 }
@@ -136,7 +136,7 @@ async function mongoUpdateDocument(db, collectionName, filter, update) {
             if(err !== null) {
                 console.error(err)
             } else {
-                console.log('Updated the document', result.result, filter, update);
+                console.log('Updated the document');
             }
         });
 }

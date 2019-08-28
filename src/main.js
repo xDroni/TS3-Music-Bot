@@ -158,14 +158,6 @@ async function main(host, login, password) {
 
         const clientlist = await client.send("clientlist");
 
-        // listening for server to be edited
-        await client.on('serveredited', data => {
-            console.log('Server edited!');
-            if(data[0]) {
-               console.log(data[0]);
-            }
-        });
-
         // listening for client to connect to the server
         await client.on('cliententerview', data => {
             mongoFindOne(mongoClient.db(), collectionName, {_id: data[0].client_unique_identifier }).then(res => {
@@ -192,10 +184,8 @@ async function main(host, login, password) {
         // listening for client to disconnect from the server
         await client.on('clientleftview', data => {
             console.log(`Client disconnected.`);
-            console.log(data[0]);
             mongoFindOne(mongoClient.db(), collectionName, { currentClid: data[0].clid }).then(res => {
                 if(res !== null) {
-                    console.log(res);
                     mongoUpdateDocument(mongoClient.db(), collectionName,
                         { currentClid: data[0].clid },
                         {

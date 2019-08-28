@@ -3,9 +3,9 @@ const MongoClient = require('mongodb').MongoClient;
 const { getArgument, escapeRegExp, sendPrivateMessage, msToTime } = require("./utils.js");
 const { mongoInsertDocuments, mongoFindOne, mongoUpdateDocument} = require("./utils.js");
 const { handleChannelMessage, handlePrivateMessage } = require("./message_handler.js");
+const { getAFKChannel, AFKCheck, AFKChannelListener} = require("./afk-handler");
 
 const NICKNAME = 'MusicBot';
-let AFKRoomCid;
 
 async function welcomeMessage(client, data, _maxOnline, _totalOnline) {
     let clientInfo = await client.send('clientinfo', {
@@ -63,48 +63,6 @@ async function moveAdminTo(client, channel_id) {
 		console.error('Music bot or serverAdmin has not been found');
 }
 
-async function getAFKChannel(client) {
-    const channellist = await client.send('channellist');
-    for(let k in channellist.response) {
-        let channelinfo = await client.send('channelinfo', {cid: channellist.response[k].cid});
-        if(channelinfo.response[0].channel_topic === 'AFK ROOM') {
-            console.log(`Afk room cid: ${channellist.response[k].cid}`);
-            AFKRoomCid = channellist.response[k].cid;
-            return channellist.response[k].cid;
-        }
-    }
-    throw('AFK Channel not found');
-}
-
-async function AFKCheck(client) {
-    const clientlist = await client.send('clientlist');
-    for(let k in clientlist.response) {
-        await client.send('clientinfo', { clid: clientlist.response[k].clid }).then(clientinfo => {
-            if(clientinfo.response != null) {
-                const info = clientinfo.response[0];
-                if(info.client_type == 0 && info.client_idle_time > 28000 && (info.client_output_muted == 1 || info.client_away == 1)) {
-                    moveAFK(client, clientlist, clientlist.response[k].clid)
-                }
-            }
-        }).catch(err => console.log(err))
-    }
-}
-
-async function moveAFK(client, clientList, clid) { ///TODO: move the user back when unmuted
-    if(AFKRoomCid !== undefined) {
-        let userToMove = clientList.response.find((obj) => {
-            return obj.clid === clid;
-        });
-        if(userToMove) {
-            if(userToMove.cid !== AFKRoomCid) {
-                client.send('clientmove', {clid: clid, cid: AFKRoomCid})
-                console.log(`${userToMove.client_nickname} moved to AFK channel, clid: ${AFKRoomCid}`);
-                sendPrivateMessage(client, clid, `You have been moved to the AFK Room`)
-            }
-        }
-    }
-}
-
 async function main(host, login, password) {
     //console.log('host:', host);
     //console.log('login:', login);
@@ -133,8 +91,6 @@ async function main(host, login, password) {
             client_login_password: password
         });
         await client.send("clientupdate", {client_nickname: NICKNAME});
-
-        // await client.subscribePrivateTextEvents();
 
         // register notifications when user sends private message
         await client.send("servernotifyregister", {
@@ -224,13 +180,17 @@ async function main(host, login, password) {
 
         await getAFKChannel(client).then((res) => { //searching for the channel with topic 'AFK ROOM'
             console.log('AFK room cid set to ' + res);
-            console.log('AFKRoomCid: ' + AFKRoomCid);
         }).catch(err => console.log(err));
 
-        // AFK checking very 30 seconds
+        // AFK checking every 30 seconds
         setInterval( () => {
             AFKCheck(client);
-        }, 30000);
+        }, 10000);
+
+        // AFK channel checking to bring users back
+        setInterval( () => {
+            AFKChannelListener(client);
+        }, 9000);
 
     } catch(err) {
         console.error("An error occurred: ");

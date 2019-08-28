@@ -184,6 +184,7 @@ async function main(host, login, password) {
                         isOnline: true
                     };
                     mongoInsertDocuments(mongoClient.db(), collectionName, params);
+                    welcomeMessage(client, data[0], 0, 0);
                 }
             });
         });

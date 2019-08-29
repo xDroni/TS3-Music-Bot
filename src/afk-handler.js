@@ -24,7 +24,7 @@ async function AFKCheck(client) {
         if (clientinfo.response !== null && clientinfo.response.length > 0) {
             const info = clientinfo.response[0];
             // noinspection JSUnresolvedVariable
-            if (info.client_type === 0 && info.client_idle_time > 10000 &&
+            if (info.client_type === 0 && info.client_idle_time > 180000 && // incactive for 3 minutes
                 (info.client_output_muted === 1 || info.client_away === 1))
             {
                 await moveAFK(client, clientlist, clientlist.response[k].clid, clientlist.response[k].cid);
@@ -56,13 +56,13 @@ async function AFKChannelListener(client) {
     if(AFKRoomCid !== undefined) {
         const clientlist = await client.send("clientlist", {'-voice': '', '-away': ''});
         
-        for(let obj of clientlist.response) {
-            if( obj.cid === AFKRoomCid && obj.client_output_muted === 0 && obj.client_away === 0 &&
-                AFKClients.some(e => e.clid === obj.clid) )
+        for(let cl of clientlist.response) {
+            if( cl.cid === AFKRoomCid && cl.client_output_muted === 0 && cl.client_away === 0 &&
+                AFKClients.some(e => e.clid === cl.clid) )
             {
-                const AFKClientIndex = AFKClients.findIndex((obj) => obj.clid === obj.clid);
+                const AFKClientIndex = AFKClients.findIndex((obj) => obj.clid === cl.clid);
                 if(AFKClientIndex !== -1) {
-                    await moveAFKBack(client, obj.clid, AFKClients[AFKClientIndex].cid);
+                    await moveAFKBack(client, cl.clid, AFKClients[AFKClientIndex].cid);
                     AFKClients.splice(AFKClientIndex, 1);
                 }
             }

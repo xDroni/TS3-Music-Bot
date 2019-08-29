@@ -1,5 +1,5 @@
 {
-  "name": "ts3-musicbot-node",
+  "name": "ts3-music-bot",
   "version": "1.0.0",
   "description": "Music Bot for TeamSpeak 3 in NodeJS",
   "main": "src/main.js",

@@ -29,6 +29,10 @@ const Playlist = require("./playlist");
 const youtube = require('./youtube-api');
 
 const entities = new Entities();
+const Server = require('./server');
+
+const server = new Server(Playlist);
+server.run();
 
 function addToPlaylist(title, invokerName, client) {
     youtube.searchVideos(title, 1).then((result) => {

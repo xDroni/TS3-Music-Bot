@@ -1,11 +1,15 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import socketIOClient from 'socket.io-client';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { apiResponse: {} }
+    this.state = {
+      apiResponse: {},
+      endpoint: "http://localhost:9000"
+    }
   }
 
   callAPI() {
@@ -15,7 +19,14 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.callAPI();
+    const { endpoint } = this.state;
+    const socket = socketIOClient(endpoint);
+    socket.on('songAdded', data => {
+      this.setState({
+        apiResponse: data,
+      })
+    });
+    // this.callAPI();
   }
 
   render() {
@@ -30,8 +41,6 @@ class App extends React.Component {
         </div>
     );
   }
-
-
 }
 
 export default App;

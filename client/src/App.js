@@ -20,6 +20,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    this.callAPI();
     const { endpoint } = this.state;
     const socket = socketIOClient(endpoint);
     socket.on('songAdded', data => {
@@ -33,7 +34,6 @@ class App extends React.Component {
         info: data,
       })
     });
-    this.callAPI();
   }
 
   render() {

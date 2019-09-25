@@ -1,7 +1,11 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import 'bulma';
 import socketIOClient from 'socket.io-client';
+
+import Navbar from "./Navbar";
+import Message from "./Message";
+import MusicContent from "./MusicContent";
 
 class App extends React.Component {
   constructor(props) {
@@ -21,18 +25,21 @@ class App extends React.Component {
 
   componentDidMount() {
     this.callAPI();
+
     const { endpoint } = this.state;
     const socket = socketIOClient(endpoint);
     socket.on('songAdded', data => {
       this.setState({
         info: data,
-      })
+      });
+      this.callAPI();
     });
 
     socket.on('skipCurrent', data => {
       this.setState({
         info: data,
-      })
+      });
+      this.callAPI();
     });
   }
 
@@ -40,14 +47,14 @@ class App extends React.Component {
     let playlist = this.state.playlist.map(item => {
       return <p>{item.title}</p>
     });
+    console.log('info', this.state.info);
     return (
-        <div className="App">
-          <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
-            <p className="App-intro">In the queue: {playlist}</p>
-            <p className="App-intro" style={this.state.info ? {'display' : 'block'} : {'display' : 'none'}}>{this.state.info}</p>
-          </header>
+        <div className="container">
+          <Navbar/>
+          {this.state.info  && <Message data={this.state.info}/>}
+          <MusicContent/>
         </div>
+
     );
   }
 }

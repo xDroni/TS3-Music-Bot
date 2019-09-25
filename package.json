@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/xDroni/TeamSpeak-3-Music-Bot#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "html-entities": "latest",
     "lame": "^1.2.4",

@@ -1,11 +1,18 @@
 const AudioHandler = require('./audio-handler');
 const express = require('express');
 const socket = require('socket.io');
+const cors = require('cors');
 const port = 9000;
 //Socket setup
 const app = express();
 const server = app.listen(port, () => console.log('listening to requests on port 9000'));
 const io = socket(server);
+app.use(cors());
+
+app.use('/getPlaylist', (req, res) => {
+    const data = getPlaylist();
+    res.send(data);
+});
 
 /** @type {AudioHandler[]} */
 let queue = [];
@@ -33,6 +40,14 @@ function playNext() {
     });
 }
 
+function  getPlaylist() {
+    let result = [];
+    for(let i=0; i<queue.length; i++) {
+        result.push(queue[i])
+    }
+    return result
+}
+
 module.exports = {
     /** @param {string} song_url
      * @param {string} clientName
@@ -42,11 +57,7 @@ module.exports = {
         let audio_handler = new AudioHandler(song_url, clientName, title);
         queue.push( audio_handler );
 
-        socketHandler('songAdded', {
-            url: song_url,
-            clientName: clientName,
-            title: title,
-        });
+        socketHandler('songAdded', `Song ${title} added to the playlist by ${clientName}`);
         
         if( !current )//no song currently playing
             playNext();
@@ -57,6 +68,7 @@ module.exports = {
             console.log('Queue is empty');
             return false;
         } else {
+            socketHandler('skipCurrent', `Song ${current.title} skipped by ${current.clientName}`);
             current.finish();
             return true;
         }
@@ -71,15 +83,6 @@ module.exports = {
             return true;
         }
     },
-
-    /*get() {
-        if(queue.length !== 0)
-            return queue.shift();
-        else {
-            console.log('playlist is empty');
-            return 'https:\/\/youtube.com';
-        }
-    },*/
 
     getSize() {
         return queue.length;

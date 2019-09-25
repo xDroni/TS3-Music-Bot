@@ -7,15 +7,16 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      apiResponse: {},
+      info: '',
+      playlist: [],
       endpoint: "http://localhost:9000"
     }
   }
 
   callAPI() {
-    fetch("http://localhost:9000/current")
+    fetch("http://localhost:9000/getPlaylist")
         .then(res => res.json())
-        .then(res => this.setState({ apiResponse: res }));
+        .then(res => this.setState({ playlist: res }));
   }
 
   componentDidMount() {
@@ -23,20 +24,28 @@ class App extends React.Component {
     const socket = socketIOClient(endpoint);
     socket.on('songAdded', data => {
       this.setState({
-        apiResponse: data,
+        info: data,
       })
     });
-    // this.callAPI();
+
+    socket.on('skipCurrent', data => {
+      this.setState({
+        info: data,
+      })
+    });
+    this.callAPI();
   }
 
   render() {
-    console.log(this.state.apiResponse);
+    let playlist = this.state.playlist.map(item => {
+      return <p>{item.title}</p>
+    });
     return (
         <div className="App">
           <header className="App-header">
             <img src={logo} className="App-logo" alt="logo" />
-            <p className="App-intro">Title: {this.state.apiResponse.title}</p>
-
+            <p className="App-intro">In the queue: {playlist}</p>
+            <p className="App-intro" style={this.state.info ? {'display' : 'block'} : {'display' : 'none'}}>{this.state.info}</p>
           </header>
         </div>
     );

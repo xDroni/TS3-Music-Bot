@@ -1,9 +1,9 @@
 import React from 'react';
-import './App.css';
 import 'bulma';
+import './App.css';
 import socketIOClient from 'socket.io-client';
 
-import Navbar from "./Navbar";
+import NavBar from "./Navbar";
 import Message from "./Message";
 import MusicContent from "./MusicContent";
 
@@ -14,7 +14,9 @@ class App extends React.Component {
       info: '',
       playlist: [],
       endpoint: "http://localhost:9000"
-    }
+    };
+
+    this.clearInfo = this.clearInfo.bind(this);
   }
 
   callAPI() {
@@ -24,7 +26,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.callAPI();
+    // this.callAPI();
 
     const { endpoint } = this.state;
     const socket = socketIOClient(endpoint);
@@ -32,29 +34,36 @@ class App extends React.Component {
       this.setState({
         info: data,
       });
-      this.callAPI();
+
+      // this.callAPI();
     });
 
     socket.on('skipCurrent', data => {
       this.setState({
         info: data,
       });
-      this.callAPI();
+      // this.callAPI();
     });
   }
 
+  clearInfo(delay) {
+    setTimeout(() => {
+      this.setState({
+        info: ''
+      })
+    },  delay)
+  }
+
   render() {
-    let playlist = this.state.playlist.map(item => {
-      return <p>{item.title}</p>
-    });
-    console.log('info', this.state.info);
+    // let playlist = this.state.playlist.map(item => {
+    //   return <p>{item.title}</p>
+    // });
     return (
         <div className="container">
-          <Navbar/>
-          {this.state.info  && <Message data={this.state.info}/>}
-          <MusicContent/>
+          <NavBar />
+          <MusicContent />
+          {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo}/> : null}
         </div>
-
     );
   }
 }

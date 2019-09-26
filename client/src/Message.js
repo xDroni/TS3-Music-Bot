@@ -1,17 +1,26 @@
 import React from 'react';
 
-function Message(props) {
-    return (
-        <article className="message is-small">
-            <div className="message-header">
-                <p></p>
-                <button className="delete is-small" aria-label="delete"></button>
-            </div>
-            <div className="message-body">
-                {props.data}
-            </div>
-        </article>
-    )
-}
+export default class Message extends React.Component {
+    constructor(props) {
+        super(props);
+    }
 
-export default Message;
+    componentDidMount() {
+        this.props.handleClear(5000);
+    }
+
+    render() {
+        return (
+            <div className="columns">
+                <div className="column is-7 is-offset-5">
+                    <article className="message is-small is-success ">
+                        <div className="message-body">
+                            <p>{this.props.data}</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        );
+    }
+
+}

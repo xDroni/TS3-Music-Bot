@@ -20,12 +20,28 @@ let queue = [];
 /** @type {AudioHandler | undefined} */
 let current;
 
+/** @type {{AudioHandler} | undefined} */
+let previous;
+
 function socketHandler(event, data) {
     io.sockets.emit(event, data);
 }
 
 function playNext() {
     current = queue.shift();
+    if(previous === undefined) {
+        previous = {
+            curr: current,
+            prev: null
+        }
+    }
+    else {
+        previous = {
+            curr: current,
+            prev: previous.curr
+        }
+    }
+
     if( !current ) {
         console.log('playlist finished');
         return;
@@ -36,16 +52,25 @@ function playNext() {
     current.play(error => {
         if(error)
             console.error(error);
+        else if(close) {
+            console.log(close);
+        }
         playNext()
     });
 }
 
-function  getPlaylist() {
+function getPlaylist() {
     let result = [];
     for(let i=0; i<queue.length; i++) {
         result.push(queue[i])
     }
     return result
+}
+
+function getPrevious() {
+    if(!previous)   return null;
+    else            return previous.prev;
+
 }
 
 module.exports = {
@@ -90,5 +115,7 @@ module.exports = {
 
     getCurrent() {
         return current;
-    }
+    },
+
+    getPrevious
 };

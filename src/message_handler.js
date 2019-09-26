@@ -104,9 +104,22 @@ module.exports = {
 				break;
 			}
             case 'current': {
-                sendChannelMessage(client, Playlist.getCurrent().title + ' requested by ' + Playlist.getCurrent().clientName);
+            	if(!Playlist.getCurrent()) {
+					sendChannelMessage(client, 'Nothing is playing right now');
+				} else {
+					sendChannelMessage(client, Playlist.getCurrent().title + ' requested by ' + Playlist.getCurrent().clientName);
+				}
                 break;
             }
+			case 'previous': {
+				if(!Playlist.getPrevious()) {
+					sendChannelMessage(client, 'Cannot find previous song');
+				} else {
+					sendChannelMessage(client, Playlist.getPrevious().title + ' requested by ' + Playlist.getPrevious().clientName);
+				}
+				break;
+			}
+
 			case 'size': {
 				sendChannelMessage(client, Playlist.getSize() + ' songs in the queue');
 				break;

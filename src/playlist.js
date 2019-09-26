@@ -52,9 +52,7 @@ function playNext() {
     current.play(error => {
         if(error)
             console.error(error);
-        else if(close) {
-            console.log(close);
-        }
+
         playNext()
     });
 }

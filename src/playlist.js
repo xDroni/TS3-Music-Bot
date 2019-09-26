@@ -9,8 +9,12 @@ const server = app.listen(port, () => console.log('listening to requests on port
 const io = socket(server);
 app.use(cors());
 
-app.use('/getPlaylist', (req, res) => {
-    const data = getPlaylist();
+app.use('/getData', (req, res) => {
+    const data = {
+        playlist: getPlaylist(),
+        previous: getPrevious(),
+        current: getCurrent()
+    };
     res.send(data);
 });
 
@@ -65,6 +69,10 @@ function getPlaylist() {
     return result
 }
 
+function getCurrent() {
+    return current;
+}
+
 function getPrevious() {
     if(!previous)   return null;
     else            return previous.prev;
@@ -111,9 +119,6 @@ module.exports = {
         return queue.length;
     },
 
-    getCurrent() {
-        return current;
-    },
-
+    getCurrent,
     getPrevious
 };

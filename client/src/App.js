@@ -12,7 +12,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       info: '',
-      playlist: [],
+      apiData: [],
       endpoint: "http://localhost:9000"
     };
 
@@ -20,13 +20,13 @@ class App extends React.Component {
   }
 
   callAPI() {
-    fetch("http://localhost:9000/getPlaylist")
+    fetch("http://localhost:9000/getData")
         .then(res => res.json())
-        .then(res => this.setState({ playlist: res }));
+        .then(res => this.setState({ apiData: res }));
   }
 
   componentDidMount() {
-    // this.callAPI();
+    this.callAPI();
 
     const { endpoint } = this.state;
     const socket = socketIOClient(endpoint);
@@ -35,14 +35,14 @@ class App extends React.Component {
         info: data,
       });
 
-      // this.callAPI();
+      this.callAPI();
     });
 
     socket.on('skipCurrent', data => {
       this.setState({
         info: data,
       });
-      // this.callAPI();
+      this.callAPI();
     });
   }
 
@@ -55,13 +55,13 @@ class App extends React.Component {
   }
 
   render() {
-    // let playlist = this.state.playlist.map(item => {
+    // let playlist = this.state.apiData.map(item => { //TODO apidata.playlist
     //   return <p>{item.title}</p>
     // });
     return (
         <div className="container">
           <NavBar />
-          <MusicContent />
+          <MusicContent current={playlist}/>
           {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo}/> : null}
         </div>
     );

@@ -83,7 +83,7 @@ module.exports = {
 			}
 			case 'skip': {//skip current song
 				let currentInfo;
-				if(Playlist.getCurrent() !== undefined) {
+				if(Playlist.getCurrent()) {
 					currentInfo = Playlist.getCurrent().title + ' requested by ' + Playlist.getCurrent().clientName;
 				}
 				if(Playlist.skipCurrent() === true) {

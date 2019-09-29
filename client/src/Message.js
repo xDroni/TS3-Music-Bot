@@ -9,11 +9,9 @@ export default class Message extends React.Component {
         return (
             <div className="columns">
                 <div className="column is-7 is-offset-5">
-                    <article className="message is-small is-success ">
-                        <div className="message-body">
-                            <p>{this.props.data}</p>
-                        </div>
-                    </article>
+                    <div className="notification is-success ">
+                        <p>{this.props.data}</p>
+                    </div>
                 </div>
             </div>
         );

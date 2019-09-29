@@ -66,11 +66,11 @@ function getPlaylist() {
     for(let i=0; i<queue.length; i++) {
         result.push(queue[i])
     }
-    return result
+    return result.length > 0 ? result : null
 }
 
 function getCurrent() {
-    return current;
+    return current || null
 }
 
 function getPrevious() {

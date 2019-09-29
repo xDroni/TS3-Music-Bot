@@ -16,6 +16,9 @@ class App extends React.Component {
       endpoint: "http://localhost:9000"
     };
 
+    const { endpoint } = this.state;
+    this.socket = socketIOClient(endpoint);
+
     this.clearInfo = this.clearInfo.bind(this);
   }
 
@@ -28,9 +31,7 @@ class App extends React.Component {
   componentDidMount() {
     this.callAPI();
 
-    const { endpoint } = this.state;
-    const socket = socketIOClient(endpoint);
-    socket.on('songAdded', data => {
+    this.socket.on('songAdded', data => {
       this.setState({
         info: data,
       });
@@ -38,7 +39,7 @@ class App extends React.Component {
       this.callAPI();
     });
 
-    socket.on('skipCurrent', data => {
+    this.socket.on('skipCurrent', data => {
       this.setState({
         info: data,
       });
@@ -55,14 +56,15 @@ class App extends React.Component {
   }
 
   render() {
-    // let playlist = this.state.apiData.map(item => { //TODO apidata.playlist
-    //   return <p>{item.title}</p>
-    // });
+    let data = this.state.apiData;
     return (
-        <div className="container">
+        <div className="container is-fluid">
           <NavBar />
-          <MusicContent current={playlist}/>
-          {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo}/> : null}
+          <section className="section">
+            {data ? <MusicContent data={data}/>: null}
+          </section>
+
+          {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo} socket={this.socket}/> : null}
         </div>
     );
   }

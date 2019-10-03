@@ -13,6 +13,7 @@ function MusicContent(props) {
 
     function socketHandler(socket, event, data) {
         if(socket) {
+            console.log(socket);
             socket.emit(event, data);
         }
     }
@@ -22,7 +23,12 @@ function MusicContent(props) {
             <div className="column is-3 is-narrow has-text-centered">
                 <p>Previous:</p>
                 <p>{previous ? previous.title + ' requested by ' + previous.clientName : 'No previous song'}</p>
-                {previous ? <a onClick={socketHandler(props.socket, 'addSong', `Song ${previous.title} added to the playlist by ${previous.clientName}`)}>Add again</a> : null }
+                {previous ? <a onClick={
+                    () => socketHandler(props.socket, 'addAgain', {
+                        info: `Song ${previous.title} added to the playlist by ${previous.clientName}`,
+                        previous: previous,
+                        }
+                    )}>Add again</a> : null }
             </div>
             <div className="column is-6 is-narrow has-text-centered">
                 <p>Current:</p>

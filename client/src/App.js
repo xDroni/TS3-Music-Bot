@@ -72,10 +72,10 @@ class App extends React.Component {
         <div className="container is-fluid">
           <NavBar />
           <section className="section">
-            <MusicContent {...this.state} />
+            <MusicContent {...this.state} socket={this.socket} />
           </section>
 
-          {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo} socket={this.socket}/> : null}
+          {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo}/> : null}
         </div>
     );
   }

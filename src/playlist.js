@@ -18,17 +18,12 @@ app.use('/getData', (req, res) => {
     res.send(data);
 });
 
-app.use('/getPlaylist', (req, res) => {
-    res.send(getPlaylist());
+io.on('addAgain', data => {
+    console.log('adding song by add again socket');
+    // this.add(data.previous.url, data.previous.clientName, data.previous.title)
 });
 
-app.use('/getCurrent', (req, res) => {
-    res.send(getCurrent());
-});
 
-app.use('/getPrevious', (req, res) => {
-    res.send(getPrevious());
-});
 
 /** @type {AudioHandler[]} */
 let queue = [];
@@ -97,6 +92,7 @@ module.exports = {
      * @param {string} title
      */
     add(song_url, clientName, title) {
+        console.log(io);
         let audio_handler = new AudioHandler(song_url, clientName, title);
         queue.push( audio_handler );
 

@@ -18,9 +18,10 @@ app.use('/getData', (req, res) => {
     res.send(data);
 });
 
-io.on('addAgain', data => {
-    console.log('adding song by add again socket');
-    // this.add(data.previous.url, data.previous.clientName, data.previous.title)
+io.on('connection', data => {
+    data.on('addAgain', data => {
+        add(data.previous.url, data.previous.clientName, data.previous.title)
+    })
 });
 
 
@@ -86,26 +87,26 @@ function getPrevious() {
 
 }
 
+function add(song_url, clientName, title) {
+    let audio_handler = new AudioHandler(song_url, clientName, title);
+    queue.push( audio_handler );
+
+    if( !current )//no song currently playing
+        playNext();
+
+    socketHandler('songAdded', {
+        info: `Song ${title} added to the playlist by ${clientName}`,
+        current: getCurrent(),
+        playlist: getPlaylist(),
+    });
+}
+
 module.exports = {
     /** @param {string} song_url
      * @param {string} clientName
      * @param {string} title
      */
-    add(song_url, clientName, title) {
-        console.log(io);
-        let audio_handler = new AudioHandler(song_url, clientName, title);
-        queue.push( audio_handler );
-
-        if( !current )//no song currently playing
-            playNext();
-
-        socketHandler('songAdded', {
-            info: `Song ${title} added to the playlist by ${clientName}`,
-            current: getCurrent(),
-            playlist: getPlaylist(),
-        });
-    },
-
+    
     skipCurrent() {
         if(!current) {
             console.log('Queue is empty');
@@ -138,5 +139,6 @@ module.exports = {
     },
 
     getCurrent,
-    getPrevious
+    getPrevious,
+    add,
 };

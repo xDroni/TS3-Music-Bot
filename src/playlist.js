@@ -18,6 +18,18 @@ app.use('/getData', (req, res) => {
     res.send(data);
 });
 
+app.use('/getPlaylist', (req, res) => {
+    res.send(getPlaylist());
+});
+
+app.use('/getCurrent', (req, res) => {
+    res.send(getCurrent());
+});
+
+app.use('/getPrevious', (req, res) => {
+    res.send(getPrevious());
+});
+
 /** @type {AudioHandler[]} */
 let queue = [];
 
@@ -88,10 +100,14 @@ module.exports = {
         let audio_handler = new AudioHandler(song_url, clientName, title);
         queue.push( audio_handler );
 
-        socketHandler('songAdded', `Song ${title} added to the playlist by ${clientName}`);
-        
         if( !current )//no song currently playing
             playNext();
+
+        socketHandler('songAdded', {
+            info: `Song ${title} added to the playlist by ${clientName}`,
+            current: getCurrent(),
+            playlist: getPlaylist(),
+        });
     },
 
     skipCurrent() {
@@ -99,8 +115,14 @@ module.exports = {
             console.log('Queue is empty');
             return false;
         } else {
-            socketHandler('skipCurrent', `Song ${current.title} skipped by ${current.clientName}`);
+            let temp = current;
             current.finish();
+            socketHandler('skipCurrent', {
+                info: `Song ${temp.title} skipped by ${temp.clientName}`,
+                playlist: getPlaylist(),
+                current: getCurrent(),
+                previous: getPrevious(),
+            });
             return true;
         }
     },

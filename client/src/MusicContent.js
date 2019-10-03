@@ -2,12 +2,11 @@ import React from 'react';
 import YouTubeEmbed from "./YouTube";
 
 function MusicContent(props) {
-    let current = props.data.current;
-    let previous  = props.data.previous;
+    let current = props.current;
+    let previous  = props.previous;
     let playlist;
-    let socket = props.socket;
-    if(props.data.playlist) {
-        playlist = props.data.playlist.map(item => {
+    if(props.playlist) {
+        playlist = props.playlist.map(item => {
             return <p>{item.title}</p>
         });
     }

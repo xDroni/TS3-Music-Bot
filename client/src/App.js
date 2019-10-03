@@ -12,8 +12,10 @@ class App extends React.Component {
     super(props);
     this.state = {
       info: '',
-      apiData: [],
-      endpoint: "http://localhost:9000"
+      playlist: null,
+      current: null,
+      previous: null,
+      endpoint: 'http://localhost:9000'
     };
 
     const { endpoint } = this.state;
@@ -22,28 +24,38 @@ class App extends React.Component {
     this.clearInfo = this.clearInfo.bind(this);
   }
 
-  callAPI() {
+  componentDidMount() {
     fetch("http://localhost:9000/getData")
         .then(res => res.json())
-        .then(res => this.setState({ apiData: res }));
-  }
-
-  componentDidMount() {
-    this.callAPI();
+        .then(res => this.setState({
+          playlist: res.playlist,
+          current: res.current,
+          previous: res.previous,
+        }));
 
     this.socket.on('songAdded', data => {
-      this.setState({
-        info: data,
-      });
-
-      this.callAPI();
+      if(this.state.playlist === null && this.state.current === null) {
+        this.setState({
+          info: data.info,
+          current: data.current,
+        });
+      }
+      else {
+        this.setState({
+          info: data.info,
+          playlist: data.playlist,
+        });
+      }
     });
 
     this.socket.on('skipCurrent', data => {
       this.setState({
-        info: data,
+        info: data.info,
+        playlist: data.playlist,
+        current: data.current,
+        previous: data.previous,
       });
-      this.callAPI();
+
     });
   }
 
@@ -56,12 +68,11 @@ class App extends React.Component {
   }
 
   render() {
-    let data = this.state.apiData;
     return (
         <div className="container is-fluid">
           <NavBar />
           <section className="section">
-            {data ? <MusicContent data={data}/>: null}
+            <MusicContent {...this.state} />
           </section>
 
           {this.state.info ? <Message data={this.state.info} handleClear={this.clearInfo} socket={this.socket}/> : null}

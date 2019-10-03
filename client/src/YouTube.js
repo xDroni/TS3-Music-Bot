@@ -5,7 +5,7 @@ export default class YouTubeEmbed extends React.Component {
     render() {
         const options = {
             playerVars: {
-                autoplay: 1,
+                autoplay: 0,
             }
         };
 

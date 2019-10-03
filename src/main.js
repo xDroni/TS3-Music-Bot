@@ -3,7 +3,7 @@ const { TeamSpeakClient } = require("node-ts");
 const Database = require('./database');
 const { getArgument, escapeRegExp, sendPrivateMessage, msToTime } = require("./utils");
 const { handleChannelMessage, handlePrivateMessage } = require("./message_handler");
-const { getAFKChannel, AFKCheck, AFKChannelListener} = require("./afk-handler");
+// const { getAFKChannel, AFKCheck, AFKChannelListener} = require("./afk-handler");
 
 const NICKNAME = 'MusicBot';
 
@@ -165,20 +165,25 @@ async function main(host, login, password) {
         else if (data[0].targetmode === 1)
             handlePrivateMessage(client, data[0]);
     });
+
+    // keeping connection alive every 4 min
+    setInterval( () => {
+        client.send("version");
+    }, 240000);
     
-    //searching for the channel with topic 'AFK ROOM'
-    let afk_channel = await getAFKChannel(client).catch(err => console.log(err));
-    console.log('AFK room cid set to ' + afk_channel);
-    
-    // AFK checking every 30 seconds
-    setInterval(() => {
-        AFKCheck(client).catch(console.error);
-    }, 30000);
-    
-    // AFK channel checking every 3 seconds to move users back
-    setInterval(() => {
-        AFKChannelListener(client).catch(console.error);
-    }, 3000);
+    // //searching for the channel with topic 'AFK ROOM'
+    // let afk_channel = await getAFKChannel(client).catch(err => console.log(err));
+    // console.log('AFK room cid set to ' + afk_channel);
+    //
+    // // AFK checking every 30 seconds
+    // setInterval(() => {
+    //     AFKCheck(client).catch(console.error);
+    // }, 30000);
+    //
+    // // AFK channel checking every 3 seconds to move users back
+    // setInterval(() => {
+    //     AFKChannelListener(client).catch(console.error);
+    // }, 3000);
 }
 
 main(

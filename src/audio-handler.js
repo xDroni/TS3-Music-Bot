@@ -1,5 +1,4 @@
-const stream = require('youtube-audio-stream');
-const decoder = require('lame').Decoder;
+const stream = require('./audio-stream');
 const speaker = require('speaker');
 
 class AudioHandler {
@@ -17,7 +16,6 @@ class AudioHandler {
     /** @param {Function} onEnd */
     play(onEnd) {
         this.s = stream(this.url)
-            .pipe(decoder())
             .pipe(new speaker());
         
         this.s.on('error',(e) => onEnd(e));

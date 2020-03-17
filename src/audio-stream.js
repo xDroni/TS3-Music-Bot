@@ -1,6 +1,6 @@
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
-const config = require('config');
+const config = require('./config');
 
 if(config.ffmpegExecutablePath)
   ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);

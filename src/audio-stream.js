@@ -11,6 +11,9 @@ function stream(url) {
   return ffmpeg()
       .input(video)
       .addOption('-f s16le')
+	.on('error', (err) => {
+		console.log('An error occured ' + console.error(err))
+	})
 }
 
 module.exports = stream;

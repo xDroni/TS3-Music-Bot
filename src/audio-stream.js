@@ -6,14 +6,12 @@ if(config.ffmpegExecutablePath)
   ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);
 
 function stream(url) {
-  const video = ytdl(url);
+  const video = ytdl(url, { filter: 'audio', highWaterMark: 1<<25 });
 
   return ffmpeg()
       .input(video)
       .addOption('-f s16le')
-	.on('error', (err) => {
-		console.log('An error occured ' + console.error(err))
-	})
+	.on('error', err => err)
 }
 
 module.exports = stream;

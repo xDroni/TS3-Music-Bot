@@ -26,8 +26,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "fluent-ffmpeg": "^2.1.2",
     "html-entities": "latest",
-    "lame": "^1.2.4",
     "leaguejs": "^2.1.0",
     "mongodb": "^3.3.0",
     "node-ts": "^5.0.1",
@@ -36,9 +36,9 @@
     "replace-in-file": "^4.1.3",
     "simple-youtube-api": "latest",
     "socket.io": "^2.3.0",
-    "speaker": "^0.4.2",
+    "speaker": "^0.5.1",
     "spotify-web-api-node": "^4.0.0",
-    "youtube-audio-stream": "~0.3.5"
+    "ytdl-core": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

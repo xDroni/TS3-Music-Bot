@@ -9,11 +9,9 @@ function stream(url) {
   const video = ytdl(url);
 
   return ffmpeg()
-      .input(video)
-      .addOption('-f s16le')
-	.on('error', (err) => {
-		console.log('An error occured ' + console.error(err))
-	})
+    .input(video)
+    .addOption('-f s16le')
+    .on('error', err => err);
 }
 
 module.exports = stream;

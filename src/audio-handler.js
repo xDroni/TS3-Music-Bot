@@ -26,7 +26,6 @@ class AudioHandler {
     finish() {
         console.log('skipping');
         this.s.end();
-	//this.s.emit('finish');
     }
 }
 

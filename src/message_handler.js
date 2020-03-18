@@ -23,6 +23,7 @@ const propertiesPath = path.join(getSrcPath(), 'leagueFiles', 'properties');
 const leagueFilesPath = path.join(getSrcPath(), 'leagueFiles');
 const Hangman = require('./hangman');
 const LeagueJS = require('./league-api');
+const Covid = require('./covid19-api');
 LeagueJS.updateRateLimiter({allowBursts: true});
 
 const Playlist = require("./playlist");
@@ -260,6 +261,27 @@ module.exports = {
 					}
                 })();
                 break;
+            case 'covid':
+              if(args.length < 1) {
+                Covid.getAllCases().then(json => {
+                  let message = '\n';
+                  for(const key in json) {
+                    message += `${key}: ${json[key]}\n`
+                  }
+                  sendChannelMessage(client, message);
+                })
+              }
+              else {
+                const country = args.join(' ');
+                Covid.getCasesByCountry(country).then(json => {
+                  let message = '\n';
+                  for(const key in json) {
+                    message += `${key}: ${json[key]}\n`
+                  }
+                  sendChannelMessage(client, message);
+                })
+              }
+              break;
 			case 'properties':
 				processLineByLine(propertiesPath).then(res => {
 					sendChannelMessage(client, '\n' + res.join('\n'));

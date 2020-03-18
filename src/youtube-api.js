@@ -1,11 +1,11 @@
 const YouTube = require('simple-youtube-api');
-const fs = require('fs');
-const path = require('path');
+const GoogleSecrets = require('/secrets/GoogleAPIKey');
 
+// put your YouTube Data v3 GoogleAPIKey.json in secrets folder
 
-const utils = require('./utils');
+if(!GoogleSecrets.APIKey)
+  console.error('Google API key is missing.');
 
-// put your YouTube Data v3 GoogleAPIKey in secrets folder
-const youtube = new YouTube(fs.readFileSync(path.join(utils.getSrcPath(), '..', 'secrets', 'GoogleAPIKey' ), 'utf-8'));
+const youtube = new YouTube(GoogleSecrets.APIKey);
 
 module.exports = youtube;

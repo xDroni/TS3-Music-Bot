@@ -6,7 +6,7 @@ if(config.ffmpegExecutablePath)
   ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);
 
 function stream(url) {
-  const video = ytdl(url);
+  const video = ytdl(url, { filter: 'audio', highWaterMark: 1<<25 });
 
   return ffmpeg()
     .input(video)

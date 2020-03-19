@@ -37,10 +37,27 @@ npm install
 - Launch your TeamSpeak3 Client and connect to the server
 
 ### Step 5 
-- On the same machine run the music bot with parameters (clientname is the name of client that*__* you set in step 4)
+- On the same machine run the music bot with parameters (clientname is the name of client that you set in step 4)
 ```
 npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
 ```
+
+### TeamSpeak3 client capture settings 
+![TS3 Capture Settings](./images/TS3CaptureSettings.png)
+
+![TS3 Capture Settings](./images/TS3PlaybackSettings.png)
+
+My sound settings using PulseEffects with equalizer (that's optional)
+
+ALSA plug-in [node] will appear when you add the song to the queue
+
+![Sound settings](./images/PulseSettings1.png)
+
+![Sound settings](./images/PulseSettings2.png)
+
+![Sound settings](./images/PulseSettings3.png)
+
+![Sound settings](./images/PulseSettings4.png)
 
 ## How does it work
 Bot connects to the server as ServerQuery, it joins to the channel where is the client specified in the clientname parameter. Bot listens to the channel chat for the commands.

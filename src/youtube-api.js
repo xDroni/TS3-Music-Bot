@@ -1,5 +1,5 @@
 const YouTube = require('simple-youtube-api');
-const GoogleSecrets = require('/secrets/GoogleAPIKey');
+const GoogleSecrets = require('../secrets/GoogleAPIKey.json');
 
 // put your YouTube Data v3 GoogleAPIKey.json in secrets folder
 

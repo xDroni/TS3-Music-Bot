@@ -68,36 +68,36 @@ If you have everything set up you can start using commands.
 
 ### Music
 ##### Add song to the queue
->`!sr <title or link of the song>`
+`!sr <title or link of the song>`
 
 ##### Skip the current song
->`!skip`
+`!skip`
 
 ##### Remove the last added song from the queue
->`!skiplast`
+`!skiplast`
 
 ##### Get the title of the current song
->`!current`
+`!current`
 
 ##### Get the queue size
->`!size`
+`!size`
 
 
 ### League of Legends
 ##### Get 5 best champions
->`!mastery <summoner name>`
+`!mastery <summoner name>`
 
 ##### Get live game
->`!live <summoner name>`
+`!live <summoner name>`
 
 ##### Get average cs / min
->`!cs <summoner name>`
+`!cs <summoner name>`
 
 ### Config
 ##### Get the current config
->`!properties`
+`!properties`
 
 ##### Change the config
->`!propertiesSet <name> <value>`
->`Example: !propertiesSet region euw`
->`This changes the region to euw`
+`!propertiesSet <name> <value>`
+`Example: !propertiesSet region euw`
+`This changes the region to euw`

@@ -1,6 +1,8 @@
 # TeamSpeak 3 Music Bot
 TeamSpeak 3 Music Bot in NodeJS with some cool features
 
+Watch the demo: <a href="https://streamable.com/crtqz"/>https://streamable.com/crtqz</a>
+
 Features:
 - Music (Youtube API)
   - adding songs to the queue
@@ -93,11 +95,11 @@ If you have everything set up you can start using commands.
 ##### Get average cs / min
 `!cs <summoner name>`
 
-### Config
-##### Get the current config
+### Properties
+##### Get the current properties
 `!properties`
 
-##### Change the config
+##### Change the property
 `!propertiesSet <name> <value>`
 `Example: !propertiesSet region euw`
 `This changes the region to euw`

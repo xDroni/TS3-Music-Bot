@@ -26,7 +26,7 @@ You will need <a href="https://nodejs.org/en/">NodeJS</a>, <a href="https://ffmp
 ### Step 1
 - Clone this repo to your local machine
 ```
-git clone https://github.com/xDroni/TeamSpeak-3-Music-Bot-Node-JS.git
+git clone https://github.com/xDroni/TS3-Music-Bot.git
 ```
 ### Step 2
 - Install packages

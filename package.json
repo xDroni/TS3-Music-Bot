@@ -27,9 +27,9 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
-    "html-entities": "latest",
     "leaguejs": "^2.1.0",
     "mongodb": "^3.3.0",
+    "node-fetch": "latest",
     "node-ts": "^5.0.1",
     "prompt-sync": "^4.1.7",
     "properties-reader": "^0.3.1",
@@ -38,8 +38,7 @@
     "socket.io": "^2.3.0",
     "speaker": "^0.5.1",
     "spotify-web-api-node": "^4.0.0",
-    "ytdl-core": "^2.0.0",
-    "node-fetch": "latest"
+    "ytdl-core": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

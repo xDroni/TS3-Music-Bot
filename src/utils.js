@@ -36,6 +36,11 @@ function msToTime(duration) {
     return days + " days " + hours + " hours " + minutes + " minutes " + seconds + " seconds";
 }
 
+function isYouTubeLink(url) {
+    const regexp = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/;
+    return regexp.test(url);
+}
+
 function getSrcPath() {
     return path.dirname(process.mainModule.filename);
 }
@@ -108,6 +113,7 @@ module.exports = {
     replaceInFile,
     setProperty,
     getProperty,
+    isYouTubeLink,
 
     /** @param {string} name */
     getArgument(name) {

@@ -1,5 +1,4 @@
 const { TeamSpeakClient } = require("node-ts");
-const Entities = require('html-entities').AllHtmlEntities;
 const path = require('path');
 const {
 	sendChannelMessage,
@@ -17,7 +16,8 @@ const {
 	writeFile,
 	replaceInFile,
 	setProperty,
-	getProperty
+	getProperty,
+    isYouTubeLink
 } = require('./utils');
 const propertiesPath = path.join(getSrcPath(), 'leagueFiles', 'properties');
 const leagueFilesPath = path.join(getSrcPath(), 'leagueFiles');
@@ -29,19 +29,28 @@ LeagueJS.updateRateLimiter({allowBursts: true});
 const Playlist = require("./playlist");
 const youtube = require('./youtube-api');
 
-const entities = new Entities();
-
 function addToPlaylist(title, invokerName, client) {
-    youtube.searchVideos(title, 1).then((result) => {
-        let title = entities.decode(result[0].title);
-        Playlist.add(result[0].url, invokerName, title);
-        console.log(invokerName, 'added', title, 'to the playlist');
-        sendChannelMessage(client, invokerName +  ' added ' + title + ' to the playlist');
-        console.log('Playlist size:', Playlist.getSize());
-    }).catch(e => {
-    	console.error(e);
-    	sendChannelMessage(client, 'YoutubeApi error');
-    });
+    if(isYouTubeLink(title)) {
+        youtube.getVideo(title).then((result) => {
+            let title = result.title;
+            Playlist.add(`https://youtu.be/${result.id}`, invokerName, title);
+            console.log(invokerName, 'added', title, 'to the playlist');
+            sendChannelMessage(client, invokerName +  ' added ' + title + ' to the playlist');
+        }).catch(e => {
+            console.error(e);
+            sendChannelMessage(client, 'YoutubeApi error');
+        })
+    } else {
+        youtube.searchVideos(title, 1).then((result) => {
+            let title = result[0].title;
+            Playlist.add(result[0].url, invokerName, title);
+            console.log(invokerName, 'added', title, 'to the playlist');
+            sendChannelMessage(client, invokerName +  ' added ' + title + ' to the playlist');
+        }).catch(e => {
+            console.error(e);
+            sendChannelMessage(client, 'YoutubeApi error');
+        });
+    }
 }
 
 module.exports = {

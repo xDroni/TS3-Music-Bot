@@ -38,7 +38,7 @@
     "socket.io": "^2.3.0",
     "speaker": "^0.5.1",
     "spotify-web-api-node": "^4.0.0",
-    "ytdl-core": "^2.0.0"
+    "ytdl-core": "^2.1.5"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

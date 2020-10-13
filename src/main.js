@@ -1,7 +1,7 @@
 const {TeamSpeakClient} = require("node-ts");
 
 // const Database = require('./database');
-const {getArgument, escapeRegExp, sendPrivateMessage, msToTime} = require("./utils");
+const {getArgument, escapeRegExp, sendPrivateMessage, sendChannelMessage} = require("./utils");
 const {handleChannelMessage, handlePrivateMessage} = require("./message_handler");
 // const { getAFKChannel, AFKCheck, AFKChannelListener} = require("./afk-handler");
 
@@ -65,11 +65,6 @@ async function moveAdminTo(client, channel_id) {
 }
 
 async function main(host, login, password, _botname, _clientname) {
-    process.on('uncaughtException', function (err) {
-        console.log('Caught exception: ', err);
-        process.exit();
-    });
-
     if (_botname) {
         botname = _botname;
         console.log(`Music bot name set to: ${botname}`);
@@ -85,6 +80,12 @@ async function main(host, login, password, _botname, _clientname) {
     }
 
     const client = new TeamSpeakClient(host);
+
+    process.on('uncaughtException', function (err) {
+        console.log('Caught exception: ', err);
+        sendChannelMessage(client, 'Music bot restarted.');
+        process.exit();
+    });
     // await Database.connect();
     // const collectionName = 'teamspeakUsersDB';
 

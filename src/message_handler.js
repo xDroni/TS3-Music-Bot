@@ -24,6 +24,9 @@ const leagueFilesPath = path.join(getSrcPath(), 'leagueFiles');
 const Hangman = require('./hangman');
 const LeagueJS = require('./league-api');
 const Covid = require('./covid19-api');
+const Entities = require('html-entities').AllHtmlEntities;
+const entities = new Entities();
+
 LeagueJS.updateRateLimiter({allowBursts: true});
 
 const Queue = require("./queue");
@@ -33,7 +36,7 @@ const youtube = require('./youtube-api');
 function addToQueue(title, invokerName, client) {
     if (isYouTubeLink(title)) {
         youtube.getVideo(title).then((result) => {
-            let title = result.title;
+            let title = entities.decode(result.title);
             Queue.add(`https://youtu.be/${result.id}`, invokerName, title);
             console.log(invokerName, 'added', title, 'to the queue');
             sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
@@ -43,7 +46,7 @@ function addToQueue(title, invokerName, client) {
         });
     } else {
         youtube.searchVideos(title, 1).then((result) => {
-            let title = result[0].title;
+            let title = entities.decode(result[0].title);
             Queue.add(result[0].url, invokerName, title);
             console.log(invokerName, 'added', title, 'to the queue');
             sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');

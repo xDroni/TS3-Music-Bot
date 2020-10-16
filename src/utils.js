@@ -4,16 +4,16 @@ const fs = require('fs');
 const readline = require('readline');
 const replace = require('replace-in-file');
 const PropertiesReader = require('properties-reader');
-const { TeamSpeakClient } = require("node-ts");
+const {TeamSpeakClient} = require("node-ts");
 const LeagueJS = require('leaguejs');
 
 const queuesMap = {
-    0:      'Custom game',
-    400:    'Summoner\'s Rift 5v5 Draft Pick',
-    420:    'Summoner\'s Rift 5v5 Ranked Solo',
-    430:    'Summoner\'s Rift 5v5 Blind Pick',
-    440:    'Summoner\'s Rift 5v5 Ranked Flex',
-    450:    'Howling Abyss 5v5 ARAM'
+    0: 'Custom game',
+    400: 'Summoner\'s Rift 5v5 Draft Pick',
+    420: 'Summoner\'s Rift 5v5 Ranked Solo',
+    430: 'Summoner\'s Rift 5v5 Blind Pick',
+    440: 'Summoner\'s Rift 5v5 Ranked Flex',
+    450: 'Howling Abyss 5v5 ARAM'
 };
 
 /** @param {string} str */
@@ -86,8 +86,7 @@ async function replaceInFile(path, searchValue, replaceValue) {
     try {
         const results = await replace(options);
         console.log('Replacement results:', results);
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Error occurred with replacing file: ', err);
     }
 }
@@ -119,8 +118,8 @@ module.exports = {
     getArgument(name) {
         for (let arg of process.argv) {
             let regexp = new RegExp(`^${escapeRegExp(name)}`);
-            if( arg.match(regexp) )
-			    return arg.replace(regexp, '').substring(1);
+            if (arg.match(regexp))
+                return arg.replace(regexp, '').substring(1);
         }
 
         try {//ask user to type password in console
@@ -131,7 +130,7 @@ module.exports = {
             return '';
         }
     },
-    
+
     /**
      * @param {TeamSpeakClient} client
      * @param {string} message
@@ -143,7 +142,7 @@ module.exports = {
             msg: message
         }).catch(console.error);
     },
-    
+
     /**
      * @param {TeamSpeakClient} client
      * @param {number} target_id
@@ -169,10 +168,10 @@ module.exports = {
         let championsMap;
         let receivedMap = await leagueJs.StaticData.gettingChampions(region);
         championsMap = receivedMap.keys;
-        let max_digits = championMastery.slice(0, 5).map(ch => ch.championPoints.toString().length).reduce((a,b) => Math.max(a,b));
+        let max_digits = championMastery.slice(0, 5).map(ch => ch.championPoints.toString().length).reduce((a, b) => Math.max(a, b));
         return championMastery.slice(0, 5).map(ch => {
             let points = ch.championPoints.toString();
-            return points + ''.padEnd((max_digits-points.length)*2 + 1, ' ') + championsMap[ch.championId];
+            return points + ''.padEnd((max_digits - points.length) * 2 + 1, ' ') + championsMap[ch.championId];
         });
     },
 
@@ -233,9 +232,9 @@ module.exports = {
     async getMatchListById(leagueJs, accountId, region = leagueJs.config.PLATFORM_ID) {
         let riftCodes = [];
         Object.entries(queuesMap).filter(entry => {
-            return (entry[1].includes('Rift'))
+            return (entry[1].includes('Rift'));
         }).forEach(v => {
-            riftCodes.push(v[0])
+            riftCodes.push(v[0]);
         });
 
         return leagueJs.Match.gettingListByAccount(accountId, region, {

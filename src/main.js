@@ -161,10 +161,12 @@ async function main(host, login, password, _botname, _clientname) {
 
     let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === clientname);
 
-    if (musicBotInfo)
+    if (musicBotInfo) {
         await moveAdminTo(client, musicBotInfo.cid);
-    else
+        sendChannelMessage(client, 'Music bot successfully started.');
+    } else {
         console.error(`${clientname} not found`);
+    }
 
     // listening for client move to other channel
     client.on('clientmoved', data => {

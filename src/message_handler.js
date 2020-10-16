@@ -360,6 +360,10 @@ module.exports = {
                     sendChannelMessage(client, 'Example: !propertiesSet region eune');
                 });
                 break;
+            case 'exit':
+                sendChannelMessage(client, 'Music bot turned off.');
+                process.exit();
+                break;
             case 'propertiesset':
                 if (args.length < 2) {
                     sendChannelMessage(client, `Invalid number of arguments, expected 2 or more, received ${args.length}`);

@@ -103,3 +103,17 @@ If you have everything set up you can start using commands.
 `!propertiesSet <name> <value>`
 `Example: !propertiesSet region euw`
 `This changes the region to euw`
+
+### Other
+##### Exit the music bot
+`!exit`
+
+### Bash script for auto restart after exit
+```
+#!/bin/bash
+while true
+do
+    npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
+    sleep 1
+done
+```

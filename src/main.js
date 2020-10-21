@@ -1,9 +1,7 @@
 const {TeamSpeakClient} = require("node-ts");
 
-// const Database = require('./database');
 const {getArgument, escapeRegExp, sendPrivateMessage, sendChannelMessage} = require("./utils");
 const {handleChannelMessage, handlePrivateMessage} = require("./message_handler");
-// const { getAFKChannel, AFKCheck, AFKChannelListener} = require("./afk-handler");
 
 let botname = 'MusicBot';
 let clientname = 'DJ Tiesto';
@@ -19,25 +17,16 @@ async function welcomeMessage(client, data, _maxOnline, _totalOnline) {
         let lastConnected = new Date(clientInfo.client_lastconnected * 1000);
         let firstConnectedMonth = firstConnected.getMonth() + 1;
         let lastConnectedMonth = lastConnected.getMonth() + 1;
-        // let maxOnline = msToTime(_maxOnline); ///TODO: save and update connectedTime
-        // let totalOnline = msToTime(_totalOnline);
+
+        const messageText = `\nYour first connection: ${firstConnected.getFullYear()}-${firstConnectedMonth < 10 ? '0' + firstConnectedMonth : firstConnectedMonth}-${firstConnected.getDate() < 10 ? '0' + firstConnected.getDate() : firstConnected.getDate()} at ${firstConnected.getHours() < 10 ? '0' + firstConnected.getHours() : firstConnected.getHours()} ${firstConnected.getMinutes() < 10 ? '0' + firstConnected.getMinutes() : firstConnected.getMinutes()}`
+            + `\nYour last connection: ${lastConnected.getFullYear()}-${lastConnectedMonth < 10 ? '0' + lastConnectedMonth : lastConnectedMonth}-${lastConnected.getDate() < 10 ? '0' + lastConnected.getDate() : lastConnected.getDate()} at ${lastConnected.getHours() < 10 ? '0' + lastConnected.getHours() : lastConnected.getHours()} ${lastConnected.getMinutes() < 10 ? '0' + lastConnected.getMinutes() : lastConnected.getMinutes()}`
+            + `\nIt's your ${clientInfo.client_totalconnections} visit here!`
+            + `\nHave Fun! :D`;
 
         sendPrivateMessage(client, data.clid,
-            `\n[b][color=#5D77FF]Hello ${clientInfo.client_nickname}![/color][/b]`
-            + `\nYour first connection: ${firstConnected.getFullYear()}-${firstConnectedMonth < 10 ? '0' + firstConnectedMonth : firstConnectedMonth}-${firstConnected.getDate() < 10 ? '0' + firstConnected.getDate() : firstConnected.getDate()} at ${firstConnected.getHours() < 10 ? '0' + firstConnected.getHours() : firstConnected.getHours()} ${firstConnected.getMinutes() < 10 ? '0' + firstConnected.getMinutes() : firstConnected.getMinutes()}`
-            + `\nYour last connection: ${lastConnected.getFullYear()}-${lastConnectedMonth < 10 ? '0' + lastConnectedMonth : lastConnectedMonth}-${lastConnected.getDate() < 10 ? '0' + lastConnected.getDate() : lastConnected.getDate()} at ${lastConnected.getHours() < 10 ? '0' + lastConnected.getHours() : lastConnected.getHours()} ${lastConnected.getMinutes() < 10 ? '0' + lastConnected.getMinutes() : lastConnected.getMinutes()}`
-            // + `\nMax online time: ${maxOnline}`
-            // + `\nTotal online time: ${totalOnline}`
-            + `\nIt's your ${clientInfo.client_totalconnections} visit here!`
-            + `\nHave Fun! :D`);
-        console.log(`clid: ${data.clid}`
-            + `\nWelcome ${clientInfo.client_nickname}!`
-            + `\nYour first connection: ${firstConnected.getFullYear()}-${firstConnectedMonth < 10 ? '0' + firstConnectedMonth : firstConnectedMonth}-${firstConnected.getDate() < 10 ? '0' + firstConnected.getDate() : firstConnected.getDate()} at ${firstConnected.getHours() < 10 ? '0' + firstConnected.getHours() : firstConnected.getHours()} ${firstConnected.getMinutes() < 10 ? '0' + firstConnected.getMinutes() : firstConnected.getMinutes()}`
-            + `\nYour last connection: ${lastConnected.getFullYear()}-${lastConnectedMonth < 10 ? '0' + lastConnectedMonth : lastConnectedMonth}-${lastConnected.getDate() < 10 ? '0' + lastConnected.getDate() : lastConnected.getDate()} at ${lastConnected.getHours() < 10 ? '0' + lastConnected.getHours() : lastConnected.getHours()} ${lastConnected.getMinutes() < 10 ? '0' + lastConnected.getMinutes() : lastConnected.getMinutes()}`
-            // + `\nMax online time: ${maxOnline}`
-            // + `\nTotal online time: ${totalOnline}`
-            + `\nIt's your ${clientInfo.client_totalconnections} visit here!`
-            + `\nHave Fun! :D`);
+            `\n[b][color=#5D77FF]Hello ${clientInfo.client_nickname}![/color][/b] ${messageText}`);
+
+        console.log(`clid: ${data.clid}  ${messageText}`);
     }
 }
 
@@ -125,39 +114,7 @@ async function main(host, login, password, _botname, _clientname) {
     // listening for client to connect to the server
     await client.on('cliententerview', async (data) => {
         await welcomeMessage(client, data[0]);
-        // let res = await Database.mongoFindOne(collectionName, {_id: data[0].client_unique_identifier});
-        // if (res !== null) {
-        //     await welcomeMessage(client, data[0], res.maxOnline, res.totalOnline);
-        //     await Database.mongoUpdateDocument(collectionName, {_id: data[0].client_unique_identifier},
-        //         {currentClid: data[0].clid, lastConnected: Date.now(), isOnline: true});
-        // } else {
-        //     let params = {
-        //         _id: data[0].client_unique_identifier,
-        //         maxOnline: 0,
-        //         totalOnline: 0,
-        //         currentClid: data[0].clid,
-        //         lastConnected: Date.now(),
-        //         isOnline: true
-        //     };
-        //     await Database.mongoInsertDocuments(collectionName, params);
-        //     await welcomeMessage(client, data[0], 0, 0);
-        // }
     });
-
-    // listening for client to disconnect from the server
-    // await client.on('clientleftview', async (data) => {
-    //     console.log(`Client disconnected.`);
-    //     let res = await Database.mongoFindOne(collectionName, {currentClid: data[0].clid});
-    //     if (res !== null) {
-    //         Database.mongoUpdateDocument(collectionName, {currentClid: data[0].clid}, {
-    //             totalOnline: res.totalOnline + (Date.now() - res.lastConnected),
-    //             maxOnline: res.maxOnline > (Date.now() - res.lastConnected) ? res.maxOnline : (Date.now() - res.lastConnected),
-    //             isOnline: false
-    //         }).catch(console.error);
-    //     } else {
-    //         console.log(`Something bad happened.`);
-    //     }
-    // });
 
     let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === clientname);
 
@@ -189,20 +146,6 @@ async function main(host, login, password, _botname, _clientname) {
     setInterval(() => {
         client.send("version");
     }, 240000);
-
-    // //searching for the channel with topic 'AFK ROOM'
-    // let afk_channel = await getAFKChannel(client).catch(err => console.log(err));
-    // console.log('AFK room cid set to ' + afk_channel);
-    //
-    // // AFK checking every 30 seconds
-    // setInterval(() => {
-    //     AFKCheck(client).catch(console.error);
-    // }, 30000);
-    //
-    // // AFK channel checking every 3 seconds to move users back
-    // setInterval(() => {
-    //     AFKChannelListener(client).catch(console.error);
-    // }, 3000);
 }
 
 main(

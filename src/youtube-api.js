@@ -1,11 +1,11 @@
 const YouTube = require('simple-youtube-api');
-const GoogleSecrets = require('../secrets/GoogleAPIKey.json');
+const config = require('./config.json');
 
 // put your YouTube Data v3 GoogleAPIKey.json in secrets folder
 
-if(!GoogleSecrets.APIKey)
-  console.error('Google API key is missing.');
+if (!config.GoogleAPIKey)
+    console.error('Google API key is missing.');
 
-const youtube = new YouTube(GoogleSecrets.APIKey);
+const youtube = new YouTube(config.GoogleAPIKey);
 
 module.exports = youtube;

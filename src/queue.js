@@ -20,10 +20,9 @@ app.use('/getData', (req, res) => {
 
 io.on('connection', data => {
     data.on('addAgain', data => {
-        add(data.previous.url, data.previous.clientName, data.previous.title)
-    })
+        add(data.previous.url, data.previous.clientName, data.previous.title);
+    });
 });
-
 
 
 /** @type {AudioHandler[]} */
@@ -41,57 +40,56 @@ function socketHandler(event, data) {
 
 function playNext() {
     current = queue.shift();
-    if(previous === undefined) {
+    if (previous === undefined) {
         previous = {
             curr: current,
             prev: null
-        }
-    }
-    else {
+        };
+    } else {
         previous = {
             curr: current,
             prev: previous.curr
-        }
+        };
     }
 
-    if( !current ) {
+    if (!current) {
         console.log('playlist finished');
         return;
     }
-    
+
     console.log('Playing:', current.title, 'requested by', current.clientName);
 
     current.play(error => {
-        if(error)
+        if (error)
             console.error(error);
 
-        playNext()
+        playNext();
     });
 }
 
 function getPlaylist() {
     let result = [];
-    for(let i=0; i<queue.length; i++) {
-        result.push(queue[i])
+    for (let i = 0; i < queue.length; i++) {
+        result.push(queue[i]);
     }
-    return result.length > 0 ? result : null
+    return result.length > 0 ? result : null;
 }
 
 function getCurrent() {
-    return current || null
+    return current || null;
 }
 
 function getPrevious() {
-    if(!previous)   return null;
-    else            return previous.prev;
+    if (!previous) return null;
+    else return previous.prev;
 
 }
 
 function add(song_url, clientName, title) {
     let audio_handler = new AudioHandler(song_url, clientName, title);
-    queue.push( audio_handler );
+    queue.push(audio_handler);
 
-    if( !current )//no song currently playing
+    if (!current)//no song currently playing
         playNext();
 
     socketHandler('songAdded', {
@@ -106,9 +104,9 @@ module.exports = {
      * @param {string} clientName
      * @param {string} title
      */
-    
+
     skipCurrent() {
-        if(!current) {
+        if (!current) {
             console.log('Queue is empty');
             return false;
         } else {
@@ -125,7 +123,7 @@ module.exports = {
     },
 
     skipLast() {
-        if(queue.length === 0) {
+        if (queue.length === 0) {
             console.log('Queue is empty');
             return false;
         } else {

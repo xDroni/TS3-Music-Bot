@@ -34,7 +34,7 @@ git clone https://github.com/xDroni/TS3-Music-Bot.git
 npm install
 ```
 ### Step 3
-- Copy your API keys to the appropriate files in the secrets folder
+- Copy your API keys to the config.json file
 ### Step 4
 - Launch your TeamSpeak3 Client and connect to the server
 
@@ -49,7 +49,9 @@ npm start host="server_address" login="query_login" password="query_password" bo
 
 ![TS3 Capture Settings](./images/TS3PlaybackSettings.png)
 
-My sound settings using PulseEffects with equalizer (that's optional)
+*(optional part)*
+
+My sound settings using PulseEffects with equalizer
 
 ALSA plug-in [node] will appear when you add the song to the queue
 

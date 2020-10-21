@@ -19,7 +19,6 @@ class AudioHandler {
             .pipe(new speaker());
         
         this.s.on('error',(e) => onEnd(e));
-        //this.s.on('finish',() => onEnd());
         this.s.on('close',() => onEnd());
     }
 

@@ -18,8 +18,12 @@ class AudioHandler {
         this.s = stream(this.url)
             .pipe(new speaker());
         
-        this.s.on('error',(e) => onEnd(e));
-        this.s.on('close',() => onEnd());
+        this.s.on('error',(e) => {
+            onEnd(e)
+        });
+        this.s.on('close',(e) => {
+            onEnd(e)
+        });
     }
 
     finish() {

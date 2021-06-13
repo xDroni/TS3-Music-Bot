@@ -27,20 +27,20 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
-    "html-entities": "^1.3.1",
-    "leaguejs": "^2.1.0",
+    "html-entities": "^1.4.0",
+    "leaguejs": "^2.1.3",
     "node-fetch": "latest",
-    "node-ts": "^5.0.1",
-    "prompt-sync": "^4.1.7",
+    "node-ts": "^5.1.1",
+    "prompt-sync": "^4.2.0",
     "properties-reader": "^0.3.1",
-    "replace-in-file": "^4.1.3",
+    "replace-in-file": "^4.3.1",
     "simple-youtube-api": "latest",
-    "socket.io": "^2.4.0",
-    "speaker": "^0.5.1",
+    "socket.io": "^2.4.1",
+    "speaker": "^0.5.3",
     "spotify-web-api-node": "^4.0.0",
     "ytdl-core": "latest"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "nodemon": "^2.0.7"
   }
 }

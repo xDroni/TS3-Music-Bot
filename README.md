@@ -6,6 +6,7 @@ Watch the demo: <a href="https://streamable.com/crtqz"/>https://streamable.com/c
 Features:
 - Music (Youtube API)
   - adding songs to the queue
+  - adding playlists (no Google API key needed)
   - skipping current song, removing last added song
   - getting title of the current song
   - counting songs in the queue
@@ -19,7 +20,7 @@ Features:
   - sending a welcome message with some statistics to every user that joins our server
   
 ## Installation
-Tested on Linux, Ubuntu 16.04.5 and 18.04.3
+Tested on Linux, Ubuntu 16.04.5, 18.04.3 and 20.04.2 using Node 11.15 and 14.0
 
 You will need <a href="https://nodejs.org/en/">NodeJS</a>, <a href="https://ffmpeg.org/">ffmpeg</a>, <a href="https://teamspeak.com/en/downloads/">TeamSpeak3 Client</a>, libasound2-dev and desktop environment (to launch the TS3 Client).
 
@@ -74,11 +75,17 @@ If you have everything set up you can start using commands.
 ##### Add song to the queue
 `!sr <title or link of the song>`
 
+##### Add playlist to the queue
+`!p <link of the playlist`
+
 ##### Skip the current song
 `!skip`
 
 ##### Remove the last added song from the queue
 `!skiplast`
+
+##### Remove all songs
+`!skipall`
 
 ##### Get the title of the current song
 `!current`

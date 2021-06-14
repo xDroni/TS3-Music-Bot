@@ -1,29 +1,4 @@
 const AudioHandler = require('./audio-handler');
-const express = require('express');
-const socket = require('socket.io');
-const cors = require('cors');
-const port = 9000;
-//Socket setup
-const app = express();
-const server = app.listen(port, () => console.log('listening to requests on port 9000'));
-const io = socket(server);
-app.use(cors());
-
-app.use('/getData', (req, res) => {
-    const data = {
-        playlist: getPlaylist(),
-        previous: getPrevious(),
-        current: getCurrent()
-    };
-    res.send(data);
-});
-
-io.on('connection', data => {
-    data.on('addAgain', data => {
-        add(data.previous.url, data.previous.clientName, data.previous.title);
-    });
-});
-
 
 /** @type {AudioHandler[]} */
 let queue = [];
@@ -34,12 +9,20 @@ let current;
 /** @type {{AudioHandler} | undefined} */
 let previous;
 
-function socketHandler(event, data) {
-    io.sockets.emit(event, data);
-}
+/** @type {AudioHandler[]} */
+let playlist = [];
 
 function playNext() {
-    current = queue.shift();
+    if (queue.length !== 0) {
+        current = queue.shift();
+    } else if (playlist.length !== 0) {
+        current = playlist.shift();
+    } else {
+        current = null;
+        console.log('No more songs to play.');
+        return;
+    }
+
     if (previous === undefined) {
         previous = {
             curr: current,
@@ -53,7 +36,7 @@ function playNext() {
     }
 
     if (!current) {
-        console.log('playlist finished');
+        console.log('Queue finished');
         return;
     }
 
@@ -67,13 +50,6 @@ function playNext() {
     });
 }
 
-function getPlaylist() {
-    let result = [];
-    for (let i = 0; i < queue.length; i++) {
-        result.push(queue[i]);
-    }
-    return result.length > 0 ? result : null;
-}
 
 function getCurrent() {
     return current || null;
@@ -85,18 +61,21 @@ function getPrevious() {
 
 }
 
-function add(song_url, clientName, title) {
+function addSong(song_url, clientName, title) {
     let audio_handler = new AudioHandler(song_url, clientName, title);
     queue.push(audio_handler);
 
     if (!current)//no song currently playing
         playNext();
+}
 
-    socketHandler('songAdded', {
-        info: `Song ${title} added to the playlist by ${clientName}`,
-        current: getCurrent(),
-        playlist: getPlaylist(),
-    });
+function addPlaylist(p, clientName) {
+    for (const song of p) {
+        playlist.push(new AudioHandler(song.url, clientName, song.title));
+    }
+
+    if (!current)//no song currently playing
+        playNext();
 }
 
 module.exports = {
@@ -110,14 +89,7 @@ module.exports = {
             console.log('Queue is empty');
             return false;
         } else {
-            let temp = current;
             current.finish();
-            socketHandler('skipCurrent', {
-                info: `Song ${temp.title} skipped by ${temp.clientName}`,
-                playlist: getPlaylist(),
-                current: getCurrent(),
-                previous: getPrevious(),
-            });
             return true;
         }
     },
@@ -132,11 +104,24 @@ module.exports = {
         }
     },
 
+    skipAll() {
+        if (queue.length === 0 && playlist.length === 0) {
+            console.log('Queue and playlist are empty');
+            return false;
+        } else {
+            queue = [];
+            playlist = [];
+            current.finish();
+            return true;
+        }
+    },
+
     getSize() {
-        return queue.length;
+        return {queueSize: queue.length, playlistSize: playlist.length};
     },
 
     getCurrent,
     getPrevious,
-    add,
+    addSong,
+    addPlaylist
 };

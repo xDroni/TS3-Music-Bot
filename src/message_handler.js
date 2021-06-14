@@ -1,5 +1,6 @@
 const {TeamSpeakClient} = require("node-ts");
 const path = require('path');
+const ytpl = require('ytpl');
 const {
     sendChannelMessage,
     championMastery,
@@ -45,7 +46,7 @@ function addToQueue(title, invokerName, client) {
     if (isYouTubeLink(title)) {
         youtube.getVideo(title).then((result) => {
             let title = entities.decode(result.title);
-            Queue.add(`https://youtu.be/${result.id}`, invokerName, title);
+            Queue.addSong(`https://youtu.be/${result.id}`, invokerName, title);
             console.log(invokerName, 'added', title, 'to the queue');
             sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
         }).catch(e => {
@@ -55,13 +56,30 @@ function addToQueue(title, invokerName, client) {
     } else {
         youtube.searchVideos(title, 1).then((result) => {
             let title = entities.decode(result[0].title);
-            Queue.add(result[0].url, invokerName, title);
+            Queue.addSong(result[0].url, invokerName, title);
             console.log(invokerName, 'added', title, 'to the queue');
             sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
         }).catch(e => {
             console.error(e);
             sendChannelMessage(client, 'YoutubeApi error');
         });
+    }
+}
+
+async function addPlaylist(playlist, invokerName, client) {
+    try {
+        await ytpl(playlist, {limit: Infinity}).then(playlist => {
+            const p = playlist.items.map(song => ({
+                url: song.shortUrl,
+                title: song.title,
+            }))
+
+            Queue.addPlaylist(p, invokerName);
+            sendChannelMessage(client, `${invokerName} added '${playlist.title}' to the queue (${playlist.estimatedItemCount} songs, last ${playlist.lastUpdated.toLowerCase()})`);
+        });
+    } catch (e) {
+        console.error(e);
+        sendChannelMessage(client, 'Error, check the link');
     }
 }
 
@@ -118,6 +136,14 @@ module.exports = {
                 }
                 break;
             }
+            case 'skipall': {
+                if (Queue.skipAll() === true) {
+                    sendChannelMessage(client, 'Skipping all');
+                } else {
+                    sendChannelMessage(client, 'Queue is empty');
+                }
+                break;
+            }
             case 'current': {
                 if (!Queue.getCurrent()) {
                     sendChannelMessage(client, 'Nothing is playing right now');
@@ -135,11 +161,21 @@ module.exports = {
                 break;
             }
             case 'size': {
-                sendChannelMessage(client, Queue.getSize() + ' songs in the queue');
+                const {queueSize, playlistSize} = Queue.getSize();
+                sendChannelMessage(client, queueSize + ' songs in the queue, ' + playlistSize + ' songs in the playlist');
                 break;
             }
             case 'playlist':
             case 'p': {
+                let playlist;
+                if (args.length < 1) {
+                    sendChannelMessage(client, 'You need to provide the link to youtube playlist');
+                } else if (args.length === 1) {
+                    // noinspection RegExpRedundantEscape
+                    playlist = args[0].replace(/^\[URL\]/i, '')
+                        .replace(/\[\/URL\]$/i, '');
+                   await addPlaylist(playlist, invokername, client);
+                }
                 break;
             }
 

@@ -9,8 +9,20 @@ let current;
 /** @type {{AudioHandler} | undefined} */
 let previous;
 
+/** @type {AudioHandler[]} */
+let playlist = [];
+
 function playNext() {
-    current = queue.shift();
+    if (queue.length !== 0) {
+        current = queue.shift();
+    } else if (playlist.length !== 0) {
+        current = playlist.shift();
+    } else {
+        current = null;
+        console.log('No more songs to play.');
+        return;
+    }
+
     if (previous === undefined) {
         previous = {
             curr: current,
@@ -49,9 +61,18 @@ function getPrevious() {
 
 }
 
-function add(song_url, clientName, title) {
+function addSong(song_url, clientName, title) {
     let audio_handler = new AudioHandler(song_url, clientName, title);
     queue.push(audio_handler);
+
+    if (!current)//no song currently playing
+        playNext();
+}
+
+function addPlaylist(p, clientName) {
+    for (const song of p) {
+        playlist.push(new AudioHandler(song.url, clientName, song.title));
+    }
 
     if (!current)//no song currently playing
         playNext();
@@ -83,11 +104,24 @@ module.exports = {
         }
     },
 
+    skipAll() {
+        if (queue.length === 0 && playlist.length === 0) {
+            console.log('Queue and playlist are empty');
+            return false;
+        } else {
+            queue = [];
+            playlist = [];
+            current.finish();
+            return true;
+        }
+    },
+
     getSize() {
-        return queue.length;
+        return {queueSize: queue.length, playlistSize: playlist.length};
     },
 
     getCurrent,
     getPrevious,
-    add,
+    addSong,
+    addPlaylist
 };

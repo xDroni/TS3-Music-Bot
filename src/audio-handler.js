@@ -19,16 +19,20 @@ class AudioHandler {
             .pipe(new speaker());
         
         this.s.on('error',(e) => {
+            console.log('erroring')
+            this.s.destroy();
             onEnd(e)
         });
-        this.s.on('close',(e) => {
-            onEnd(e)
+        this.s.on('finish',() => {
+            console.log('finishing')
+            this.s.destroy();
+            onEnd()
         });
     }
 
     finish() {
         console.log('skipping');
-        this.s.end();
+        this.s.emit('finish');
     }
 }
 

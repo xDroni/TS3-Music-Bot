@@ -1,4 +1,5 @@
 const AudioHandler = require('./audio-handler');
+const {shuffleArray} = require('./common');
 
 /** @type {AudioHandler[]} */
 let queue = [];
@@ -69,9 +70,21 @@ function addSong(song_url, clientName, title) {
         playNext();
 }
 
-function addPlaylist(p, clientName) {
+function mix() {
+    shuffleArray(playlist);
+}
+
+function getList() {
+    return queue.concat(playlist);
+}
+
+function addPlaylist(p, clientName, mix) {
     for (const song of p) {
         playlist.push(new AudioHandler(song.url, clientName, song.title));
+    }
+
+    if(mix) {
+        this.mix();
     }
 
     if (!current)//no song currently playing
@@ -79,11 +92,6 @@ function addPlaylist(p, clientName) {
 }
 
 module.exports = {
-    /** @param {string} song_url
-     * @param {string} clientName
-     * @param {string} title
-     */
-
     skipCurrent() {
         if (!current) {
             console.log('Queue is empty');
@@ -123,5 +131,7 @@ module.exports = {
     getCurrent,
     getPrevious,
     addSong,
-    addPlaylist
+    addPlaylist,
+    mix,
+    getList
 };

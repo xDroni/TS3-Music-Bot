@@ -66,7 +66,7 @@ function addToQueue(title, invokerName, client) {
     }
 }
 
-async function addPlaylist(playlist, invokerName, client) {
+async function addPlaylist(playlist, invokerName, client, mix = false) {
     try {
         await ytpl(playlist, {limit: Infinity}).then(playlist => {
             const p = playlist.items.map(song => ({
@@ -74,7 +74,7 @@ async function addPlaylist(playlist, invokerName, client) {
                 title: song.title,
             }))
 
-            Queue.addPlaylist(p, invokerName);
+            Queue.addPlaylist(p, invokerName, mix);
             sendChannelMessage(client, `${invokerName} added '${playlist.title}' to the queue (${playlist.estimatedItemCount} songs, last ${playlist.lastUpdated.toLowerCase()})`);
         });
     } catch (e) {
@@ -176,6 +176,45 @@ module.exports = {
                         .replace(/\[\/URL\]$/i, '');
                    await addPlaylist(playlist, invokername, client);
                 }
+                else if (args.length === 2) {
+                    // noinspection RegExpRedundantEscape
+                    playlist = args[1].replace(/^\[URL\]/i, '')
+                        .replace(/\[\/URL\]$/i, '');
+                    if(args[0] === 'm' || args[0] === 'mix') {
+                        await addPlaylist(playlist, invokername, client, true);
+                    }
+                    else {
+                        sendChannelMessage(client, `Unknown parameter ${args[1]}`);
+                        await addPlaylist(playlist, invokername, client);
+                    }
+                }
+                break;
+            }
+
+            case 'mix':
+            case 'm': {
+                const {playlistSize} = Queue.getSize();
+                if(playlistSize > 2) {
+                    Queue.mix();
+                    sendChannelMessage(client, 'Mixing');
+                    break;
+                }
+                sendChannelMessage(client, 'Playlist empty?');
+                break;
+            }
+
+            case 'list':
+            case 'l': {
+                const list = Queue.getList();
+                if(list.length) {
+                    let message = '\n';
+                    for(let i=0; i<list.length && i<5; i++) {
+                        message += `${i+1}. ${list[i].title}, requested by ${list[i].clientName}\n`
+                    }
+                    sendChannelMessage(client, message);
+                    break;
+                }
+                sendChannelMessage(client, 'List is empty');
                 break;
             }
 

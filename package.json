@@ -26,13 +26,13 @@
     "fluent-ffmpeg": "^2.1.2",
     "html-entities": "^1.4.0",
     "leaguejs": "^2.1.3",
-    "naudiodon": "^2.3.5",
     "node-fetch": "latest",
     "node-ts": "^5.1.1",
     "prompt-sync": "^4.2.0",
     "properties-reader": "^0.3.1",
     "replace-in-file": "^4.3.1",
     "simple-youtube-api": "latest",
+    "speaker": "^0.5.3",
     "ytdl-core": "latest",
     "ytpl": "^2.2.1"
   }

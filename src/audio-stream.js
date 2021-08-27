@@ -12,9 +12,9 @@ function stream(url) {
 
   return ffmpeg()
       .input(video)
-      .addOption('-f s24le')
+      .addOption('-f s16le')
       .addOption('-ac 2')
-      .addOption('-ar 48000')
+      .addOption('-ar 44100')
       .on('error', err => err);
 }
 

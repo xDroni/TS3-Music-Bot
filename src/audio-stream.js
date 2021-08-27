@@ -3,15 +3,19 @@ const ffmpeg = require('fluent-ffmpeg');
 const config = require('./config');
 
 if (config.ffmpegExecutablePath)
-    ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);
+  ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);
 
 function stream(url) {
-    const video = ytdl(url, {filter: 'audio', highWaterMark: 1 << 25});
+  const video = ytdl(url, {
+    quality: 'highestaudio', highWaterMark: 1 << 25
+  });
 
-    return ffmpeg()
-        .input(video)
-        .addOption('-f s16le')
-        .on('error', err => err);
+  return ffmpeg()
+      .input(video)
+      .addOption('-f s16le')
+      .addOption('-ac 2')
+      .addOption('-ar 44100')
+      .on('error', err => err);
 }
 
 module.exports = stream;

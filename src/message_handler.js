@@ -26,7 +26,6 @@ const Hangman = require('./hangman');
 const LeagueJS = require('leaguejs');
 let leagueJS = null;
 const config = require('./config.json');
-const Covid = require('./covid19-api');
 const Entities = require('html-entities').AllHtmlEntities;
 const entities = new Entities();
 
@@ -360,26 +359,6 @@ module.exports = {
                             }
                         }
                     })();
-                }
-                break;
-            case 'covid':
-                if (args.length < 1) {
-                    Covid.getAllCases().then(json => {
-                        let message = '\n';
-                        for (const key in json) {
-                            message += `${key}: ${json[key]}\n`;
-                        }
-                        sendChannelMessage(client, message);
-                    });
-                } else {
-                    const country = args.join(' ');
-                    Covid.getCasesByCountry(country).then(json => {
-                        let message = '\n';
-                        for (const key in json) {
-                            message += `${key}: ${json[key]}\n`;
-                        }
-                        sendChannelMessage(client, message);
-                    });
                 }
                 break;
             case 'properties':

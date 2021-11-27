@@ -45,7 +45,7 @@ function addToQueue(title, invokerName, client) {
     if (isYouTubeLink(title)) {
         youtube.getVideo(title).then((result) => {
             let title = entities.decode(result.title);
-            Queue.addSong(`https://youtu.be/${result.id}`, invokerName, title);
+            Queue.addSong(`https://youtu.be/${result.id}`, invokerName, title, client);
             console.log(invokerName, 'added', title, 'to the queue');
             sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
         }).catch(e => {
@@ -55,7 +55,7 @@ function addToQueue(title, invokerName, client) {
     } else {
         youtube.searchVideos(title, 1).then((result) => {
             let title = entities.decode(result[0].title);
-            Queue.addSong(result[0].url, invokerName, title);
+            Queue.addSong(result[0].url, invokerName, title, client);
             console.log(invokerName, 'added', title, 'to the queue');
             sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
         }).catch(e => {
@@ -73,7 +73,7 @@ async function addPlaylist(playlist, invokerName, client, mix = false) {
                 title: song.title,
             }))
 
-            Queue.addPlaylist(p, invokerName, mix);
+            Queue.addPlaylist(p, invokerName, mix, client);
             sendChannelMessage(client, `${invokerName} added '${playlist.title}' to the queue (${playlist.estimatedItemCount} songs, last ${playlist.lastUpdated.toLowerCase()})`);
         });
     } catch (e) {

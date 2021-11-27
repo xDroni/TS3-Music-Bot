@@ -36,6 +36,7 @@ npm install
 ```
 ### Step 3
 - Copy your API keys to the config.json file
+- (optional) If you want to play age restricted videos fill the cookiesArray field in config.json, cookiesString field will be automatically generated. Easy way to get cookies array is to log in to your YouTube account, verify age and use plugin like EditThisCookie (tested on Chrome)
 ### Step 4
 - Launch your TeamSpeak3 Client and connect to the server
 

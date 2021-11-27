@@ -13,6 +13,8 @@ let previous;
 /** @type {AudioHandler[]} */
 let playlist = [];
 
+let client;
+
 function playNext() {
     if (queue.length !== 0) {
         current = queue.shift();
@@ -48,7 +50,7 @@ function playNext() {
             console.error(error);
 
         playNext();
-    });
+    }, client);
 }
 
 
@@ -62,8 +64,8 @@ function getPrevious() {
 
 }
 
-function addSong(song_url, clientName, title) {
-    let audio_handler = new AudioHandler(song_url, clientName, title);
+function addSong(song_url, clientName, title, _client) {
+    let audio_handler = new AudioHandler(song_url, clientName, title, _client);
     queue.push(audio_handler);
 
     if (!current)//no song currently playing
@@ -78,9 +80,9 @@ function getList() {
     return queue.concat(playlist);
 }
 
-function addPlaylist(p, clientName, mix) {
+function addPlaylist(p, clientName, mix, _client) {
     for (const song of p) {
-        playlist.push(new AudioHandler(song.url, clientName, song.title));
+        playlist.push(new AudioHandler(song.url, clientName, song.title, _client));
     }
 
     if(mix) {
@@ -113,7 +115,7 @@ module.exports = {
     },
 
     skipAll() {
-        if (queue.length === 0 && playlist.length === 0) {
+        if (queue.length === 0 && playlist.length === 0 && !current) {
             console.log('Queue and playlist are empty');
             return false;
         } else {

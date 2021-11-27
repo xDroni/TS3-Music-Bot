@@ -1,5 +1,7 @@
 {
   "GoogleAPIKey": "",
   "RiotAPIKey": "",
-  "ffmpegExecutablePath": ""
+  "ffmpegExecutablePath": "",
+  "cookiesArray": [],
+  "cookiesString": ""
 }

@@ -20,9 +20,9 @@ Features:
   - sending a welcome message with some statistics to every user that joins our server
   
 ## Installation
-Tested on Linux, Ubuntu 16.04.5, 18.04.3 and 20.04.2 using Node 11.15 and 14.0
+Tested on Linux, Ubuntu 20.10 using Node 16.13
 
-You will need <a href="https://nodejs.org/en/">NodeJS</a>, <a href="https://ffmpeg.org/">ffmpeg</a>, <a href="https://teamspeak.com/en/downloads/">TeamSpeak3 Client</a>, libasound2-dev and desktop environment (to launch the TS3 Client).
+You will need <a href="https://nodejs.org/en/">NodeJS</a>, <a href="https://ffmpeg.org/">ffmpeg</a>, <a href="https://teamspeak.com/en/downloads/">TeamSpeak3 Client</a>, python>=2.7, libasound2-dev and desktop environment (to launch the TS3 Client).
 
 ### Step 1
 - Clone this repo to your local machine
@@ -36,7 +36,7 @@ npm install
 ```
 ### Step 3
 - Copy your API keys to the config.json file
-- (optional) If you want to play age restricted videos fill the cookiesArray field in config.json, cookiesString field will be automatically generated. Easy way to get cookies array is to log in to your YouTube account, verify age and use plugin like EditThisCookie (tested on Chrome)
+- (optional) If you want to play age restricted videos on YouTube you will need an extracted file with cookies in netscape format. You can use browser extension to get this file, I've tested <a href="https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid">Get cookies.txt</a> (Chrome). Place the file in src folder and set `cookiesEnabled` to true in `src/config.json`  
 ### Step 4
 - Launch your TeamSpeak3 Client and connect to the server
 

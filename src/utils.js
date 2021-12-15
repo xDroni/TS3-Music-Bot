@@ -41,6 +41,10 @@ function isYouTubeLink(url) {
     return regexp.test(url);
 }
 
+function isLink(url) {
+  return /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/.test(url);
+}
+
 function getSrcPath() {
     return path.dirname(process.mainModule.filename);
 }
@@ -113,6 +117,7 @@ module.exports = {
     setProperty,
     getProperty,
     isYouTubeLink,
+    isLink,
 
     /** @param {string} name */
     getArgument(name) {

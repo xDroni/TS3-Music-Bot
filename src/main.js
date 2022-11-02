@@ -71,14 +71,16 @@ async function main(host, login, password, _botname, _clientname) {
     const client = new TeamSpeakClient(host);
 
     process.on('uncaughtException', function (err) {
-        console.log('Caught exception: ', err);
+        console.log('Caught exception:', err);
         sendChannelMessage(client, 'Music bot restarted.');
         process.exit();
     });
-    // await Database.connect();
-    // const collectionName = 'teamspeakUsersDB';
 
-    client.on('error', e => console.error(e));
+    client.on('error', e => {
+        console.log('Caught error:', err);
+        sendChannelMessage(client, 'Music bot restarted.');
+        process.exit();
+    });
 
     await client.connect();
     await client.send("use", {sid: 1});

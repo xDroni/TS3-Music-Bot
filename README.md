@@ -35,8 +35,8 @@ git clone https://github.com/xDroni/TS3-Music-Bot.git
 npm install
 ```
 ### Step 3
-- Copy your API keys to the config.json file
-- (optional) If you want to play age restricted videos on YouTube you will need an extracted file with cookies in netscape format. You can use browser extension to get this file, I've tested <a href="https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid">Get cookies.txt</a> (Chrome). Place the file in src folder and set `cookiesEnabled` to true in `src/config.json`  
+- Copy your API keys to the config.json file. It's located in src directory.
+- (optional) If you want to play age restricted videos fill the cookiesArray field in config.json, cookiesString field will be automatically generated. Easy way to get cookies array is to log in to your YouTube account, verify age and use plugin like EditThisCookie (tested on Chrome)
 ### Step 4
 - Launch your TeamSpeak3 Client and connect to the server
 

@@ -17,14 +17,21 @@ class AudioHandler {
   }
 
   /** @param {Function} onEnd */
-  play(onEnd) {
-    this.s = stream(this.url, this.client)
-        .pipe(new speaker({
-          channels: 2,          // 2 channels
-          bitDepth: 16,         // 16-bit samples
-          sampleRate: 44100,
-          highWaterMark: 1 << 25
-        }));
+  async play(onEnd) {
+    try {
+      this.ffmpeg = await stream(this.url, this.client);
+    } catch (e) {
+      console.error(e);
+      onEnd(e);
+      return;
+    }
+
+    this.s = this.ffmpeg.pipe(new speaker({
+      channels: 2,          // 2 channels
+      bitDepth: 16,         // 16-bit samples
+      sampleRate: 44100,
+      highWaterMark: 1 << 25
+    }));
 
     this.s.on('error', (e) => {
       console.error(e);
@@ -33,14 +40,17 @@ class AudioHandler {
       }
       sendChannelMessage(this.client, e.message);
 
+      this.ffmpeg.kill();
       this.s.destroy();
       onEnd(e);
     });
     this.s.on('finish', () => {
+      this.ffmpeg.kill();
       this.s.destroy();
       onEnd();
     });
   }
+
 
   finish() {
     this.s.emit('finish');

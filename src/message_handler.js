@@ -1,67 +1,100 @@
 const {TeamSpeakClient} = require("node-ts");
-const path = require('path');
 const ytpl = require('ytpl');
+const ytext = require("youtube-ext");
 const {
     sendChannelMessage,
-    championMastery,
-    getSummonerId,
-    getChampionsMap,
-    getCurrentMatch,
-    getLeague,
-    getAccountId,
-    getMatchById,
-    getMatchListById,
-    processLineByLine,
-    getSrcPath,
-    appendToFile,
-    writeFile,
-    replaceInFile,
-    setProperty,
-    getProperty,
-    isYouTubeLink
+    isYouTubeLink, makeRequest
 } = require('./utils');
-const propertiesPath = path.join(getSrcPath(), 'leagueFiles', 'properties');
-const leagueFilesPath = path.join(getSrcPath(), 'leagueFiles');
 const Hangman = require('./hangman');
-const LeagueJS = require('leaguejs');
-let leagueJS = null;
-const config = require('./config.json');
+
 const Entities = require('html-entities').AllHtmlEntities;
 const entities = new Entities();
 
-if (!config.RiotAPIKey) {
-    console.error('RiotAPIKey is missing.');
-} else {
-    leagueJS = new LeagueJS(config.RiotAPIKey, {
-        PLATFORM_ID: 'eun1'
-    });
-    leagueJS.updateRateLimiter({allowBursts: true});
+const Queue = require("./queue");
+const YouTubeAPI = require('./youtube-api');
+
+const config = require("./config.json");
+let isYouTubeAPIAvailable = null;
+
+async function checkYouTubeApiKey() {
+    if (!Boolean(config?.GoogleAPIKey)) {
+        return false;
+    }
+
+    let apiKeyTestResult;
+    try {
+        apiKeyTestResult = JSON.parse(await makeRequest(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=YouTube+Data+API&type=video&key=${config.GoogleAPIKey}`))
+    } catch (e) {
+        console.error(e);
+    }
+
+    const isAPIError = apiKeyTestResult && apiKeyTestResult.hasOwnProperty("error");
+
+    if (isAPIError) {
+        console.dir({APIError: apiKeyTestResult}, {depth: 5})
+    }
+
+    return isYouTubeAPIAvailable = apiKeyTestResult && !isAPIError;
 }
 
-const Queue = require("./queue");
-const youtube = require('./youtube-api');
-
-function addToQueue(title, invokerName, client) {
-    if (isYouTubeLink(title)) {
-        youtube.getVideo(title).then((result) => {
-            let title = entities.decode(result.title);
-            Queue.addSong(`https://youtu.be/${result.id}`, invokerName, title, client);
-            console.log(invokerName, 'added', title, 'to the queue');
-            sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
-        }).catch(e => {
-            console.error(e);
-            sendChannelMessage(client, 'YoutubeApi error');
-        });
+function addToQueue(titleOrUrl, userName, client) {
+    if (isYouTubeLink(titleOrUrl)) {
+        if (isYouTubeAPIAvailable) {
+            YouTubeAPI.getVideo(titleOrUrl).then((result) => {
+                let title = entities.decode(result.title);
+                Queue.addSong(`https://youtu.be/${result.id}`, userName, title, client);
+                console.log(userName, 'added', title, 'to the queue');
+                sendChannelMessage(client, userName + ' added ' + title + ' to the queue');
+            }).catch(e => {
+                console.error(e);
+                sendChannelMessage(client, 'YouTubeApi error, check console for more info. Restart the bot to switch to non-API mode.');
+            });
+        } else {
+            ytext.videoInfo(titleOrUrl, {
+                requestOptions: {
+                    headers: {
+                        Cookie: config?.cookiesString
+                    }
+                }
+            }).then(({title, id}) => {
+                Queue.addSong(`https://youtu.be/${id}`, userName, title, client);
+                console.log(userName, 'added', title, 'to the queue');
+                sendChannelMessage(client, userName + ' added ' + title + ' to the queue');
+            }).catch(e => {
+                console.error(e);
+                sendChannelMessage(client, 'Error occurred, check console for more info.');
+            });
+        }
     } else {
-        youtube.searchVideos(title, 1).then((result) => {
-            let title = entities.decode(result[0].title);
-            Queue.addSong(result[0].url, invokerName, title, client);
-            console.log(invokerName, 'added', title, 'to the queue');
-            sendChannelMessage(client, invokerName + ' added ' + title + ' to the queue');
-        }).catch(e => {
-            console.error(e);
-            sendChannelMessage(client, 'YoutubeApi error');
-        });
+        if (isYouTubeAPIAvailable) {
+            YouTubeAPI.searchVideos(titleOrUrl, 1).then((result) => {
+                let title = entities.decode(result[0].title);
+                Queue.addSong(result[0].url, userName, title, client);
+                console.log(userName, 'added', title, 'to the queue');
+                sendChannelMessage(client, userName + ' added ' + title + ' to the queue');
+            }).catch(e => {
+                console.error(e);
+                sendChannelMessage(client, 'YouTubeApi error, check console for more info. Restart the bot to switch to non-API mode.');
+            });
+        } else {
+            ytext.search(titleOrUrl, {
+                filterType: "video",
+                requestOptions: {
+                    headers: {
+                        Cookie: config?.cookiesString
+                    }
+                }
+            }).then(({videos}) => {
+                const {title, id} = videos[0];
+                Queue.addSong(`https://youtu.be/${id}`, userName, title, client);
+                console.log(userName, 'added', title, 'to the queue');
+                sendChannelMessage(client, userName + ' added ' + title + ' to the queue');
+            }).catch(e => {
+                console.error(e);
+                sendChannelMessage(client, 'Error occurred, check console for more info.');
+            });
+
+        }
     }
 }
 
@@ -83,6 +116,8 @@ async function addPlaylist(playlist, invokerName, client, mix = false) {
 }
 
 module.exports = {
+    checkYouTubeApiKey,
+
     /**
      * @param {TeamSpeakClient} client
      * @param {TextMessageNotificationData} message
@@ -99,15 +134,16 @@ module.exports = {
             default:
                 sendChannelMessage(client, 'Unknown command: ' + msg);
                 break;
+            case 'play':
+            case 's':
             case 'sr': {// song request
                 let song;
                 if (args.length < 1) {
                     sendChannelMessage(client, 'You need to provide the link to youtube or the title of the song.');
                     break;
                 } else if (args.length === 1) {
-                    // noinspection RegExpRedundantEscape
-                    song = args[0].replace(/^\[URL\]/i, '')
-                        .replace(/\[\/URL\]$/i, '');
+                    song = args[0].replace(/^\[URL]/i, '')
+                        .replace(/\[\/URL]$/i, '');
                     addToQueue(song, invokername, client);
                     break;
                 } else {
@@ -118,7 +154,7 @@ module.exports = {
             case 'skip': {//skip current song
                 let currentInfo;
                 if (Queue.getCurrent()) {
-                    currentInfo = Queue.getCurrent().title + ' requested by ' + Queue.getCurrent().clientName;
+                    currentInfo = Queue.getCurrent().title + ' requested by ' + Queue.getCurrent().userName;
                 }
                 if (Queue.skipCurrent() === true) {
                     sendChannelMessage(client, 'Skipping ' + currentInfo);
@@ -127,7 +163,8 @@ module.exports = {
                 }
                 break;
             }
-            case 'skiplast': {//remove the most recent added song from queue
+            case 'sl':
+            case 'skiplast': {//remove the most recent added song from the queue
                 if (Queue.skipLast() === true) {
                     sendChannelMessage(client, 'Removed the most recent added song');
                 } else {
@@ -135,6 +172,7 @@ module.exports = {
                 }
                 break;
             }
+            case 'sa':
             case 'skipall': {
                 if (Queue.skipAll() === true) {
                     sendChannelMessage(client, 'Skipping all');
@@ -143,22 +181,28 @@ module.exports = {
                 }
                 break;
             }
+            case 'c':
             case 'current': {
                 if (!Queue.getCurrent()) {
                     sendChannelMessage(client, 'Nothing is playing right now');
                 } else {
-                    sendChannelMessage(client, Queue.getCurrent().title + ' requested by ' + Queue.getCurrent().clientName);
+                    sendChannelMessage(client, Queue.getCurrent().title + ' requested by ' + Queue.getCurrent().userName);
                 }
                 break;
             }
+            case 'last':
             case 'previous': {
-                if (!Queue.getPrevious()) {
+                const previous = Queue.getPrevious();
+                if (!previous) {
                     sendChannelMessage(client, 'Cannot find previous song');
                 } else {
-                    sendChannelMessage(client, Queue.getPrevious().title + ' requested by ' + Queue.getPrevious().clientName);
+                    const {title, userName} = previous;
+                    addToQueue(title, userName, client)
+                    sendChannelMessage(client, title + ' requested by ' + userName);
                 }
                 break;
             }
+            case 'length':
             case 'size': {
                 const {queueSize, playlistSize} = Queue.getSize();
                 sendChannelMessage(client, queueSize + ' songs in the queue, ' + playlistSize + ' songs in the playlist');
@@ -168,33 +212,31 @@ module.exports = {
             case 'p': {
                 let playlist;
                 if (args.length < 1) {
-                    sendChannelMessage(client, 'You need to provide the link to youtube playlist');
+                    sendChannelMessage(client, 'You need to provide the link to youtube playlist.');
                 } else if (args.length === 1) {
-                    // noinspection RegExpRedundantEscape
-                    playlist = args[0].replace(/^\[URL\]/i, '')
-                        .replace(/\[\/URL\]$/i, '');
-                   await addPlaylist(playlist, invokername, client);
-                }
-                else if (args.length === 2) {
-                    // noinspection RegExpRedundantEscape
-                    playlist = args[1].replace(/^\[URL\]/i, '')
-                        .replace(/\[\/URL\]$/i, '');
-                    if(args[0] === 'm' || args[0] === 'mix') {
+                    playlist = args[0].replace(/^\[URL]/i, '')
+                        .replace(/\[\/URL]$/i, '');
+                    await addPlaylist(playlist, invokername, client);
+                } else if (args.length === 2) {
+                    // needed as links are surrounded with [URL] and [/URL]
+                    playlist = args[1].replace(/^\[URL]/i, '')
+                        .replace(/\[\/URL]$/i, '');
+                    if (['m', 'mix', 'shuffle'].includes(args[0])) {
                         await addPlaylist(playlist, invokername, client, true);
-                    }
-                    else {
-                        sendChannelMessage(client, `Unknown parameter ${args[1]}`);
+                    } else {
+                        sendChannelMessage(client, `Unknown parameter ${args[0]}`);
                         await addPlaylist(playlist, invokername, client);
                     }
                 }
                 break;
             }
 
+            case 'shuffle':
             case 'mix':
             case 'm': {
                 const {playlistSize} = Queue.getSize();
-                if(playlistSize > 2) {
-                    Queue.mix();
+                if (playlistSize > 2) {
+                    Queue.shuffle();
                     sendChannelMessage(client, 'Mixing');
                     break;
                 }
@@ -205,10 +247,10 @@ module.exports = {
             case 'list':
             case 'l': {
                 const list = Queue.getList();
-                if(list.length) {
+                if (list.length) {
                     let message = '\n';
-                    for(let i=0; i<list.length && i<5; i++) {
-                        message += `${i+1}. ${list[i].title}, requested by ${list[i].clientName}\n`
+                    for (let i = 0; i < list.length && i < 5; i++) {
+                        message += `${i + 1}. ${list[i].title}, requested by ${list[i].userName}\n`
                     }
                     sendChannelMessage(client, message);
                     break;
@@ -221,175 +263,29 @@ module.exports = {
             case 'hangman':
                 Hangman.startGame(client, invokerid);
                 break;
-            case 'maestry':
-            case 'mastery':
-                if (args.length < 1) {
-                    sendChannelMessage(client, 'Summoner name missing');
-                    break;
-                } else {
-                    championMastery(leagueJS, args.join(' ')).then(data => {
-                        sendChannelMessage(client,
-                            '\n5 best champions of ' +
-                            args.join(' ') + '\n' +
-                            data.join('\n'));
-                    });
-                    break;
-                }
-            case 'live':
-                if (!leagueJS) {
-                    const textMessage = 'RiotAPIKey is missing or invalid. Check config file.';
-                    console.error(textMessage);
-                    sendChannelMessage(client, textMessage);
-                } else {
-                    await (async () => {
-                        try {
-                            let summonerId = await getSummonerId(leagueJS, args.join(' '));
-                            let activeMatch = await getCurrentMatch(leagueJS, summonerId);
-                            try {
-                                sendChannelMessage(client, activeMatch.gameMode + ' ' + activeMatch.gameType);
-                                let team1 = [];
-                                let team2 = [];
-
-                                let championsMap = await getChampionsMap(leagueJS);
-
-                                for (const summonerData of activeMatch.participants) {
-                                    let leagueData = await getLeague(leagueJS, summonerData.summonerId);
-
-                                    let summonerName = summonerData.summonerName;
-                                    let champion = '(' + championsMap.keys[summonerData.championId] + ')';
-                                    let solo = 'SOLO: UNRANKED';
-                                    let flex = 'FLEX: UNRANKED';
-                                    let tft = 'TFT: UNRANKED';
-                                    leagueData.forEach(queue => {
-                                        if (queue.queueType.includes('SOLO')) solo = solo.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
-                                        if (queue.queueType.includes('FLEX')) flex = flex.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
-                                        if (queue.queueType.includes('TFT')) tft = tft.replace('UNRANKED', queue.tier + ' ' + queue.rank + ' ' + queue.leaguePoints + ' LP' + ' (WR ' + Math.round((queue.wins / (queue.wins + queue.losses)) * 100) + '% ' + (queue.wins + queue.losses) + ' matches)');
-                                    });
-
-                                    if (summonerData.teamId === 100) team1.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
-                                    else if (summonerData.teamId === 200) team2.push(summonerName.padEnd(20, ' ') + champion.padEnd(15, ' ') + solo.padEnd(50, ' ') + flex.padEnd(50, ' ') + tft.padEnd(50, ' '));
-                                    if (team1.length + team2.length === activeMatch.participants.length) {
-                                        sendChannelMessage(client, '\n' + team1.join('\n') + '\n' + ''.padStart(185, '-') + '\n' + team2.join('\n'));
-                                        console.log(team1.join('\n') + '\n\n' + team2.join('\n'));
-                                    }
-
-                                }
-                            } catch (err) {
-                                sendChannelMessage(client, 'Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
-                                console.error('Error: ' + JSON.parse(err.error).status.message + ' - summoner is not in game');
-                            }
-                        } catch (err) {
-                            try {
-                                let msg = JSON.parse(err.error).status.message;
-                                sendChannelMessage(client, 'Error: ' + msg);
-                                console.error('Error: ' + msg);
-                            } catch (e) {
-                                sendChannelMessage(client, err);
-                                console.error(err);
-                            }
-                        }
-                    })();
-                }
+            case 'properties': {
+                // todo
                 break;
-            case 'cs':
-                if (!leagueJS) {
-                    const textMessage = 'RiotAPIKey is missing or invalid. Check config file.';
-                    console.error(textMessage);
-                    sendChannelMessage(client, textMessage);
-                } else {
-                    await (async () => {
-                        let summonerNameToCompare, csToCompare;
-                        let csComparePath = path.join(getSrcPath(), 'leagueFiles', 'cs-compare');
-                        try {
-                            const array = await processLineByLine(csComparePath);
-                            if (array !== undefined && array.length >= 1) {
-                                if (array.length === 1) summonerNameToCompare = array[0];
-                                else if (array.length === 2) {
-                                    summonerNameToCompare = array[0];
-                                    csToCompare = array[1];
-                                }
-                            }
-                        } catch (e) {
-                            console.error(e);
-                        }
-                        const summonerNameFromArgs = args.join(' ');
-                        let summonerNameExact;
-                        let accountId = await getAccountId(leagueJS, summonerNameFromArgs).catch(err => sendChannelMessage(client, err));
-                        let matchList = await getMatchListById(leagueJS, accountId).catch(err => sendChannelMessage(client, err));
-
-                        let sum = 0, count = 0;
-                        for (let match of matchList.matches) {
-                            let res = await getMatchById(leagueJS, match.gameId).catch(err => sendChannelMessage(client, err));
-                            for (let index = 0; index < res.participants.length; index++) {
-                                if (match.role.includes('SUPPORT'))
-                                    continue;
-                                if (res.participantIdentities[index].player.summonerName.toLowerCase() === summonerNameFromArgs.toLowerCase()) {
-                                    if (summonerNameExact === undefined) summonerNameExact = res.participantIdentities[index].player.summonerName;
-                                    sum += Math.round(((res.participants[index].stats.totalMinionsKilled +
-                                        res.participants[index].stats.neutralMinionsKilled) / (res.gameDuration / 60)) * 100) / 100;
-                                    count++;
-                                    break;
-                                }
-                            }
-                        }
-                        let avgCs = Math.round((sum / count) * 100) / 100;
-                        if (summonerNameToCompare === undefined && csToCompare === undefined) {
-                            sendChannelMessage(client, `Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}.`);
-                        } else if (summonerNameToCompare !== undefined && csToCompare === undefined) {
-                            if (summonerNameExact.toLowerCase() === summonerNameToCompare.toLowerCase()) {
-                                await replaceInFile(csComparePath, summonerNameToCompare, summonerNameExact).catch(err => {
-                                    console.log(err);
-                                    sendChannelMessage(client, err);
-                                });
-                                appendToFile(csComparePath, avgCs);
-                                sendChannelMessage(client, `Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}. Updated`);
-                            } else {
-                                sendChannelMessage(client, `Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}.`);
-                            }
-                        } else if (summonerNameToCompare !== undefined && csToCompare !== undefined) {
-                            if (summonerNameExact.toLowerCase() === summonerNameToCompare.toLowerCase()) {
-                                await replaceInFile(csComparePath, csToCompare, avgCs).catch(err => {
-                                    console.log(err);
-                                    sendChannelMessage(client, err);
-                                });
-                                sendChannelMessage(client, `Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}. Updated`);
-                            } else {
-                                let diff = Math.round(Math.abs(avgCs - csToCompare) / ((Number(avgCs) + Number(csToCompare)) / 2) * 1000) / 10;
-                                sendChannelMessage(client, `Average ${avgCs}cs/min in last ${count} not support games - ${summonerNameExact}, it's ${diff}% ${avgCs > csToCompare ? 'better' : 'worse'} than ${summonerNameToCompare}! ${summonerNameToCompare} has average ${csToCompare}cs/min`);
-                            }
-                        }
-                    })();
-                }
+            }
+            case 'propertiesSet':
+            case 'propertiesset':
                 break;
-            case 'properties':
-                processLineByLine(propertiesPath).then(res => {
-                    sendChannelMessage(client, '\n' + res.join('\n'));
-                    sendChannelMessage(client, 'To change property, use this syntax: !propertiesSet property value');
-                    sendChannelMessage(client, 'Example: !propertiesSet region eune');
-                });
-                break;
+            // todo
+            // if (args.length < 2) {
+            //     sendChannelMessage(client, `Invalid number of arguments, expected 2 or more, received ${args.length}`);
+            // } else {
+            //     if (getProperty(propertiesPath, args[0]) !== null) {
+            //         setProperty(propertiesPath, args[0], args.slice(1, args.length).join(' ')).then(res => {
+            //             //
+            //         });
+            //     } else {
+            //         sendChannelMessage(client, `Error: '${args[0]}' property cannot be found in the properties file.`);
+            //         console.error(`Error: '${args[0]}' property cannot be found in the properties file.`);
+            //     }
+            // }
             case 'exit':
                 sendChannelMessage(client, 'Music bot turned off.');
                 process.exit();
-                break;
-            case 'propertiesset':
-                if (args.length < 2) {
-                    sendChannelMessage(client, `Invalid number of arguments, expected 2 or more, received ${args.length}`);
-                } else {
-                    if (getProperty(propertiesPath, args[0]) !== null) {
-                        setProperty(propertiesPath, args[0], args.slice(1, args.length).join(' ')).then(res => {
-                            if (args[0].includes('csCompare')) {
-                                writeFile(path.join(leagueFilesPath, 'cs-compare'), args.slice(1, args.length).join(' '));
-                            }
-                            console.log(`Changed property. Properties are now:\n${res}`);
-                            sendChannelMessage(client, `Changed property. Properties are now:\n${res}`);
-                        });
-                    } else {
-                        sendChannelMessage(client, `Error: '${args[0]}' property cannot be found in the properties file.`);
-                        console.error(`Error: '${args[0]}' property cannot be found in the properties file.`);
-                    }
-                }
-                break;
         }
     },
 

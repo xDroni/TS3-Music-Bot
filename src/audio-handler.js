@@ -5,13 +5,13 @@ const {sendChannelMessage} = require("./utils");
 class AudioHandler {
 
   /** @param {string} url
-   * @param {string} clientName
+   * @param {string} userName
    * @param {string} title
    * @param {TeamSpeakClient} client
    */
-  constructor(url, clientName, title, client) {
+  constructor(url, userName, title, client) {
     this.url = url;
-    this.clientName = clientName;
+    this.userName = userName;
     this.title = title;
     this.client = client;
   }
@@ -28,9 +28,6 @@ class AudioHandler {
 
     this.s.on('error', (e) => {
       console.error(e);
-      if (e.message.includes("410")) {
-        e.message += "\nMost probably age restricted video, set valid cookie in config file to avoid this error";
-      }
       sendChannelMessage(this.client, e.message);
 
       this.s.destroy();

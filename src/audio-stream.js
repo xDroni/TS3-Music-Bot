@@ -7,22 +7,34 @@ const {sendChannelMessage} = require("./utils");
 if (config.ffmpegExecutablePath)
   ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);
 
-let cookies = config.cookiesString;
-if (!cookies && Array.isArray(config.cookiesArray) && config.cookiesArray.length > 0) {
+let cookies = config?.cookiesString
+if(!cookies) {
+  setCookies();
+} else {
+  console.log("Using cookiesString found in config file.")
+}
+
+function setCookies() {
+  if(!(Array.isArray(config.cookiesArray) && config.cookiesArray.length > 0)) {
+    console.log("Cookies array not found in config file.");
+    return "";
+  }
+
   try {
     cookies = config.cookiesArray;
     cookies = cookies.map((cookie) => {
       if (!cookie.name || !cookie.value) {
-        throw "wrong cookiesArray in config, expected array of objects, each containing at least name and value";
+        throw "Unexpected cookiesArray in config, expected array of objects, each containing at least name and value";
       }
       return `${cookie.name}=${cookie.value}`;
     }).join(';');
     config.cookiesString = cookies;
-    fs.writeFile(`${__dirname}/config.json`, JSON.stringify(config, null, 2), (err) => {
-      if (err) return console.error(err);
-    });
+    fs.writeFileSync(`${__dirname}/config.json`, JSON.stringify(config, null, 2));
+    console.log("Using generated cookiesString from cookiesArray.")
+    return cookies;
   } catch (e) {
     console.error(e);
+    return "";
   }
 }
 
@@ -46,7 +58,7 @@ function stream(url, client) {
       .addOption('-ar 44100')
       .on('error', (err) => {
         if (err.message.includes("410")) {
-          err.message += "\nMost probably age restricted video, set valid cookie in config file to avoid this error";
+          err.message += "\nMost likely age-restricted video, set a valid cookie in the config file to play these videos.";
           sendChannelMessage(client, err.message);
         }
       });

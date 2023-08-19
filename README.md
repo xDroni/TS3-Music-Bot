@@ -1,52 +1,71 @@
 # TeamSpeak 3 Music Bot
-TeamSpeak 3 Music Bot in NodeJS with some cool features
+#### TeamSpeak 3 Music Bot in Node.js with some cool features
 
-Watch the demo: <a href="https://streamable.com/crtqz"/>https://streamable.com/crtqz</a>
+Watch the demo: https://streamable.com/crtqz
 
 Features:
-- Music (Youtube API)
+- Music
   - adding songs to the queue
-  - adding playlists (no Google API key needed)
-  - skipping current song, removing last added song
-  - getting title of the current song
-  - counting songs in the queue
-  
-- League of Legends (RIOT API)
-  - logging 5 best champions of the player in terms of mastery points
-  - logging player's current match with all the players, their champions, divisions and ranked winratio
-  - logging average cs per minute in last player's games and comparing that score to another player
+  - adding playlists (with a shuffle option)
+  - skipping current song, removing last added song and more
+  - getting the title of the current song
+  - listing songs in the queue
+  - more (see below)
 
 - Other
   - sending a welcome message with some statistics to every user that joins our server
   
 ## Installation
-Tested on Linux, Ubuntu 16.04.5, 18.04.3 and 20.04.2 using Node 11.15 and 14.0
 
-You will need <a href="https://nodejs.org/en/">NodeJS</a>, <a href="https://ffmpeg.org/">ffmpeg</a>, <a href="https://teamspeak.com/en/downloads/">TeamSpeak3 Client</a>, libasound2-dev and desktop environment (to launch the TS3 Client).
+Tested with Node 14+ on Linux, Ubuntu.
+It may also work on Windows, but has not been tested.
+
+You will need [Node.js](https://nodejs.org/en) (at least version 14), [ffmpeg](https://ffmpeg.org),
+[TeamSpeak3 Client](https://teamspeak.com/en/downloads), libasound2-dev (if on Linux) and desktop environment
+(to launch the TS3 Client).
+
+Bot listens for commands using ServerQuery account, so you need to provide login and password.
+To reset the password, check: https://support.teamspeak.com/hc/en-us/articles/360002712898
 
 ### Step 1
-- Clone this repo to your local machine
-```
+- Clone this repo to your local machine:
+```shell
 git clone https://github.com/xDroni/TS3-Music-Bot.git
 ```
 ### Step 2
-- Install packages
-```
+- Install packages:
+```shell
 npm install
 ```
+
+> The main dependency (`ytdl-core`) is frequently updated.
+> In case of any problems, try 
+> `npm update ytdl-core` first.
+
 ### Step 3
-- Copy your API keys to the config.json file. It's located in src directory.
-- (optional) If you want to play age restricted videos fill the cookiesArray field in config.json, cookiesString field will be automatically generated. Easy way to get cookies array is to log in to your YouTube account, verify age and use plugin like EditThisCookie (tested on Chrome)
+- (optional) Copy your YouTube API key into the config.json file, it's located in the src/ directory. This is not necessary, but may speed up the search slightly.
+- (optional) If you want to play age-restricted videos, fill in the cookiesArray field in config.json, the cookiesString field will be generated automatically. An easy way to get cookiesArray is to sign in to your verified YouTube account and use a plugin like EditThisCookie (tested on Chrome).
 ### Step 4
-- Launch your TeamSpeak3 Client and connect to the server
+- Launch your TeamSpeak 3 Client and connect to the server.
 
 ### Step 5 
-- On the same machine run the music bot with parameters (clientname is the name of client that you set in step 4)
-```
+- On the same machine run the music bot with the following parameters (clientname is the name of the user you set in step 4):
+```shell
 npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
 ```
 
-### TeamSpeak3 client capture settings 
+### (optional) Auto-restart bash script (on error)
+```shell
+#!/bin/bash
+while true
+do
+    npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
+    sleep 1
+done
+```
+> If you run the bot with this script, it will automatically restart in case of an unexpected error. 
+
+### TeamSpeak 3 client capture settings 
 ![TS3 Capture Settings](./images/TS3CaptureSettings.png)
 
 ![TS3 Capture Settings](./images/TS3PlaybackSettings.png)
@@ -65,65 +84,56 @@ ALSA plug-in [node] will appear when you add the song to the queue
 
 ![Sound settings](./images/PulseSettings4.png)
 
-## How does it work
-Bot connects to the server as ServerQuery, it joins to the channel where is the client specified in the clientname parameter. Bot listens to the channel chat for the commands.
-If we add a song to the queue, the bot starts to stream the music.
-
 ## Usage
-If you have everything set up you can start using commands.
+Once you have everything set up, you can start using commands.
 
 ### Music
-##### Add song to the queue
-`!sr <title or link of the song>`
 
-##### Add playlist to the queue
-`!p <link of the playlist`
+##### Add song to the queue
+`!play <title or link to the song>`
+> `alias: !s and !sr`
+
+##### Add playlist
+`!playlist <link to the playlist>`
+> `alias: !p`
+> > Note that the regular queue has priority over the playlist.
+
+##### Add a playlist and shuffle it
+`!p m/mix/shuffle <link to the playlist>`
+
+> ##### You can also shuffle the playlist later using
+> `!m`, `!mix` or `!shuffle`
+
+##### List the next 5 songs in the queue / playlist
+`!list`
+> `alias: !l`
+
+##### Get the title of the current song
+`!current`
+> `alias !c`
 
 ##### Skip the current song
 `!skip`
 
 ##### Remove the last added song from the queue
 `!skiplast`
+> `alias !sl`
 
-##### Remove all songs
+##### Remove all songs from the queue
 `!skipall`
+> `alias !sa`
 
-##### Get the title of the current song
-`!current`
-
-##### Get the queue size
+##### Get the queue length
 `!size`
+> `alias !length`
 
-
-### League of Legends
-##### Get 5 best champions
-`!mastery <summoner name>`
-
-##### Get live game
-`!live <summoner name>`
-
-##### Get average cs / min
-`!cs <summoner name>`
-
-### Properties
-##### Get the current properties
-`!properties`
-
-##### Change the property
-`!propertiesSet <name> <value>`
-`Example: !propertiesSet region euw`
-`This changes the region to euw`
+##### Play the previously played song
+`!previous`
+> `alias: !last`
 
 ### Other
 ##### Exit the music bot
 `!exit`
 
-### Bash script for auto restart after exit
-```
-#!/bin/bash
-while true
-do
-    npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
-    sleep 1
-done
-```
+> If you run the bot using the auto-restart script, the !exit command will also work as an on-demand restart.
+

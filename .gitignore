@@ -1,5 +1,2 @@
 .idea/
 node_modules/
-tests/
-secrets/
-src/leagueFiles/

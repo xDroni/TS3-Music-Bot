@@ -1,5 +1,5 @@
 const AudioHandler = require('./audio-handler');
-const {shuffleArray} = require('./common');
+const {shuffleArray} = require('./utils');
 
 /** @type {AudioHandler[]} */
 let queue = [];
@@ -12,8 +12,6 @@ let previous;
 
 /** @type {AudioHandler[]} */
 let playlist = [];
-
-let client;
 
 function playNext() {
     if (queue.length !== 0) {
@@ -43,14 +41,14 @@ function playNext() {
         return;
     }
 
-    console.log('Playing:', current.title, 'requested by', current.clientName);
+    console.log('Playing:', current.title, 'requested by', current.userName);
 
     current.play(error => {
         if (error)
             console.error(error);
 
         playNext();
-    }, client);
+    });
 }
 
 
@@ -64,15 +62,15 @@ function getPrevious() {
 
 }
 
-function addSong(song_url, clientName, title, _client) {
-    let audio_handler = new AudioHandler(song_url, clientName, title, _client);
+function addSong(song_url, userName, title, _client) {
+    let audio_handler = new AudioHandler(song_url, userName, title, _client);
     queue.push(audio_handler);
 
     if (!current)//no song currently playing
         playNext();
 }
 
-function mix() {
+function shuffle() {
     shuffleArray(playlist);
 }
 
@@ -80,16 +78,16 @@ function getList() {
     return queue.concat(playlist);
 }
 
-function addPlaylist(p, clientName, mix, _client) {
+function addPlaylist(p, userName, shuffle, _client) {
     for (const song of p) {
-        playlist.push(new AudioHandler(song.url, clientName, song.title, _client));
+        playlist.push(new AudioHandler(song.url, userName, song.title, _client));
     }
 
-    if(mix) {
-        this.mix();
+    if (shuffle) {
+        this.shuffle();
     }
 
-    if (!current)//no song currently playing
+    if (!current)//no song currently playing, start the playlist
         playNext();
 }
 
@@ -99,7 +97,7 @@ module.exports = {
             console.log('Queue is empty');
             return false;
         } else {
-            current.finish();
+            setTimeout(() => current.finish(), 1)
             return true;
         }
     },
@@ -121,7 +119,7 @@ module.exports = {
         } else {
             queue = [];
             playlist = [];
-            current.finish();
+            setTimeout(() => current.finish(), 1)
             return true;
         }
     },
@@ -134,6 +132,6 @@ module.exports = {
     getPrevious,
     addSong,
     addPlaylist,
-    mix,
+    shuffle,
     getList
 };

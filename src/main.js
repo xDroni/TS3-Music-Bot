@@ -1,7 +1,7 @@
 const {TeamSpeakClient} = require("node-ts");
 
 const {getArgument, escapeRegExp, sendPrivateMessage, sendChannelMessage} = require("./utils");
-const {handleChannelMessage, handlePrivateMessage} = require("./message_handler");
+const {handleChannelMessage, handlePrivateMessage, checkYouTubeApiKey} = require("./message_handler");
 
 let botname = 'MusicBot';
 let clientname = 'DJ Tiesto';
@@ -71,13 +71,13 @@ async function main(host, login, password, _botname, _clientname) {
     const client = new TeamSpeakClient(host);
 
     process.on('uncaughtException', function (err) {
-        console.log('Caught exception:', err);
+        console.error('Caught exception:', err);
         sendChannelMessage(client, 'Music bot restarted.');
         process.exit();
     });
 
     client.on('error', e => {
-        console.log('Caught error:', err);
+        console.error('Caught error:', e);
         sendChannelMessage(client, 'Music bot restarted.');
         process.exit();
     });
@@ -91,12 +91,12 @@ async function main(host, login, password, _botname, _clientname) {
     });
     await client.send("clientupdate", {client_nickname: botname});
 
-    // register notifications when user sends private message
+    // register notifications when user sends a private message
     await client.send("servernotifyregister", {
         event: "textprivate"
     });
 
-    // register notifications when user sends message on normal channel
+    // register notifications when user sends a message on a text channel
     await client.send("servernotifyregister", {
         event: "textchannel"
     });
@@ -113,22 +113,29 @@ async function main(host, login, password, _botname, _clientname) {
 
     const clientlist = await client.send("clientlist");
 
-    // listening for client to connect to the server
+    // listening for a client to connect to the server
     await client.on('cliententerview', async (data) => {
         await welcomeMessage(client, data[0]);
     });
+
+    if (!(await checkYouTubeApiKey())) {
+        sendChannelMessage(client, 'Working in non-API mode. Check console for more info.')
+    }
 
     let musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === clientname);
 
     if (musicBotInfo) {
         await moveAdminTo(client, musicBotInfo.cid);
-        sendChannelMessage(client, 'Music bot successfully started.');
     } else {
-        console.error(`${clientname} not found`);
+        console.warn(`${clientname} client not found, working in the default channel`);
     }
 
-    // listening for client move to other channel
+    sendChannelMessage(client, 'Music bot successfully started.');
+
     client.on('clientmoved', data => {
+        if (!musicBotInfo) {
+            musicBotInfo = clientlist.response.find((obj) => obj.client_nickname === clientname);
+        }
         if (musicBotInfo && data[0] && data[0].clid === musicBotInfo.clid) {
             moveAdminTo(client, data[0].ctid).catch(console.error);
         }
@@ -144,7 +151,7 @@ async function main(host, login, password, _botname, _clientname) {
             handlePrivateMessage(client, data[0]);
     });
 
-    // keeping connection alive every 4 min
+    // keeping the connection alive every 4 minutes
     setInterval(() => {
         client.send("version");
     }, 240000);
@@ -156,7 +163,4 @@ main(
     getArgument('password'),
     getArgument('botname'),
     getArgument('clientname')
-).catch(err => {
-    console.error("An error occurred: ");
-    console.error(err);
-});
+).catch(console.error);

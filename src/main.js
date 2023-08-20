@@ -1,7 +1,7 @@
 const { TeamSpeakClient } = require('node-ts');
 
 const { getArgument, escapeRegExp, sendPrivateMessage, sendChannelMessage } = require('./utils');
-const { handleChannelMessage, handlePrivateMessage, checkYouTubeApiKey } = require('./message_handler');
+const { handleChannelMessage, handlePrivateMessage, isYouTubeAPIAvailableFn } = require('./message_handler');
 
 let botname = 'MusicBot';
 let clientname = 'DJ Tiesto';
@@ -128,7 +128,7 @@ async function main(host, login, password, _botname, _clientname) {
     await welcomeMessage(client, data[0]);
   });
 
-  if (!(await checkYouTubeApiKey())) {
+  if (!(await isYouTubeAPIAvailableFn())) {
     sendChannelMessage(client, 'Working in non-API mode. Check console for more info.');
   }
 

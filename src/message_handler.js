@@ -13,7 +13,7 @@ const YouTubeAPI = require('./youtube-api');
 const config = require('./config.json');
 let isYouTubeAPIAvailable = null;
 
-async function checkYouTubeApiKey() {
+async function isYouTubeAPIAvailableFn() {
   if (!Boolean(config?.GoogleAPIKey)) {
     return false;
   }
@@ -122,7 +122,7 @@ async function addPlaylist(playlist, invokerName, client, mix = false) {
 }
 
 module.exports = {
-  checkYouTubeApiKey,
+  isYouTubeAPIAvailableFn,
 
   /**
    * @param {TeamSpeakClient} client

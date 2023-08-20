@@ -1,9 +1,8 @@
 const stream = require('./audio-stream');
 const speaker = require('speaker');
-const {sendChannelMessage} = require("./utils");
+const { sendChannelMessage } = require('./utils');
 
 class AudioHandler {
-
   /** @param {string} url
    * @param {string} userName
    * @param {string} title
@@ -18,13 +17,14 @@ class AudioHandler {
 
   /** @param {Function} onEnd */
   play(onEnd) {
-    this.s = stream(this.url, this.client)
-        .pipe(new speaker({
-          channels: 2,          // 2 channels
-          bitDepth: 16,         // 16-bit samples
-          sampleRate: 44100,
-          highWaterMark: 1 << 25
-        }));
+    this.s = stream(this.url, this.client).pipe(
+      new speaker({
+        channels: 2, // 2 channels
+        bitDepth: 16, // 16-bit samples
+        sampleRate: 44100,
+        highWaterMark: 1 << 25
+      })
+    );
 
     this.s.on('error', (e) => {
       console.error(e);

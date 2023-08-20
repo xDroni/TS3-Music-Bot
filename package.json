@@ -4,7 +4,8 @@
   "description": "Music Bot for TeamSpeak 3 in NodeJS",
   "main": "src/main.js",
   "scripts": {
-    "start": "node ./src/main.js"
+    "start": "node ./src/main.js",
+    "format": "prettier . --write"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-const ytdl = require('ytdl-core');
+const ytdl = require("@distube/ytdl-core");
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 const config = require('./config');
@@ -40,7 +40,7 @@ function setCookies() {
 }
 
 function stream(url, client) {
-  const video = ytdl(url, {
+  const audio = ytdl(url, {
     quality: 'highestaudio',
     highWaterMark: 1 << 25,
     filter: (format) => format.container === 'webm' && format.audioQuality === 'AUDIO_QUALITY_MEDIUM',
@@ -52,7 +52,7 @@ function stream(url, client) {
   });
 
   return ffmpeg()
-    .input(video)
+    .input(audio)
     .addOption('-f s16le')
     .addOption('-acodec pcm_s16le')
     .addOption('-ac 2')

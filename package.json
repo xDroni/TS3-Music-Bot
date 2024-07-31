@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/xDroni/TeamSpeak-3-Music-Bot#readme",
   "dependencies": {
+    "@distube/ytdl-core": "^4.13.7",
     "fluent-ffmpeg": "^2.1.2",
     "html-entities": "^1.4.0",
     "node-ts": "^5.1.2",
@@ -31,7 +32,6 @@
     "simple-youtube-api": "5.2.1",
     "speaker": "^0.5.3",
     "youtube-ext": "^1.1.6",
-    "ytdl-core": "latest",
     "ytpl": "^2.2.1"
   }
 }

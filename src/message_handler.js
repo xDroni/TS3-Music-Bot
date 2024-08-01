@@ -1,7 +1,7 @@
 const { TeamSpeakClient } = require('node-ts');
 const ytpl = require('ytpl');
 const ytext = require('youtube-ext');
-const { sendChannelMessage, isYouTubeLink, makeRequest } = require('./utils');
+const { sendChannelMessage, isYouTubeLink, makeRequest, isLink } = require('./utils');
 const Hangman = require('./hangman');
 
 const Entities = require('html-entities').AllHtmlEntities;
@@ -35,6 +35,7 @@ async function isYouTubeAPIAvailableFn() {
 }
 
 function addToQueue(titleOrUrl, userName, client) {
+  console.log(titleOrUrl);
   if (isYouTubeLink(titleOrUrl)) {
     if (isYouTubeAPIAvailable) {
       YouTubeAPI.getVideo(titleOrUrl)
@@ -81,25 +82,31 @@ function addToQueue(titleOrUrl, userName, client) {
           sendChannelMessage(client, 'YouTubeApi error, check console for more info. Restart the bot to switch to non-API mode.');
         });
     } else {
-      ytext
-        .search(titleOrUrl, {
-          filterType: 'video',
-          requestOptions: {
-            headers: {
-              Cookie: config?.cookiesString
+      if (!isLink(titleOrUrl)) {
+        ytext
+          .search(titleOrUrl, {
+            filterType: 'video',
+            requestOptions: {
+              headers: {
+                Cookie: config?.cookiesString
+              }
             }
-          }
-        })
-        .then(({ videos }) => {
-          const { title, id } = videos[0];
-          Queue.addSong(`https://youtu.be/${id}`, userName, title, client);
-          console.log(userName, 'added', title, 'to the queue');
-          sendChannelMessage(client, userName + ' added ' + title + ' to the queue');
-        })
-        .catch((e) => {
-          console.error(e);
-          sendChannelMessage(client, 'Error occurred, check console for more info.');
-        });
+          })
+          .then(({ videos }) => {
+            const { title, id } = videos[0];
+            Queue.addSong(`https://youtu.be/${id}`, userName, title, client);
+            console.log(userName, 'added', title, 'to the queue');
+            sendChannelMessage(client, userName + ' added ' + title + ' to the queue');
+          })
+          .catch((e) => {
+            console.error(e);
+            sendChannelMessage(client, 'Error occurred, check console for more info.');
+          });
+      } else {
+        Queue.addSong(titleOrUrl, userName, 'unknown', client); // todo - use yt-dlp to get title
+        console.log(userName, 'added a new song to the queue');
+        sendChannelMessage(client, userName + ' added a new song to the queue');
+      }
     }
   }
 }

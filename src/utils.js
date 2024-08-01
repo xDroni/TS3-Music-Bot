@@ -7,9 +7,14 @@ function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function isYouTubeLink(url) {
+function isYouTubeLink(titleOrUrl) {
   const regexp = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/;
-  return regexp.test(url);
+  return regexp.test(titleOrUrl);
+}
+
+function isLink(titleOrUrl) {
+  const regexp = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+  return regexp.test(titleOrUrl);
 }
 
 function shuffleArray(array) {
@@ -36,6 +41,7 @@ async function makeRequest(url) {
 module.exports = {
   escapeRegExp,
   isYouTubeLink,
+  isLink,
   shuffleArray,
   makeRequest,
 

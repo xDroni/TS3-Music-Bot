@@ -32,6 +32,10 @@
     "simple-youtube-api": "5.2.1",
     "speaker": "^0.5.3",
     "youtube-ext": "latest",
+    "yt-dlp-wrap": "^2.3.12",
     "ytpl": "^2.2.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
   }
 }

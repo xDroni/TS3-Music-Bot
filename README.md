@@ -24,8 +24,18 @@ Tested with Node 14+ on Linux, Ubuntu.
 It may also work on Windows, but has not been tested.
 
 You will need [Node.js](https://nodejs.org/en) (at least version 14), [ffmpeg](https://ffmpeg.org),
-[TeamSpeak3 Client](https://teamspeak.com/en/downloads), libasound2-dev (if on Linux) and desktop environment
-(to launch the TS3 Client).
+[TeamSpeak3 Client](https://teamspeak.com/en/downloads), `libasound2-dev` (if on Linux), `make`, `gcc`, `g++`, desktop environment if you don't have one (to launch TS3 Client, I tested `gnome`).
+
+Install required dependencies (Ubuntu / Debian):
+```shell
+sudo apt-get install ffmpeg libasound2-dev make gcc g++
+```
+
+Install a desktop environment, if you don't have one:
+```shell
+sudo apt-get install ubuntu-gnome-desktopp
+```
+or another of your choice.
 
 Bot listens for commands using ServerQuery account, so you need to provide login and password.
 To reset the password, check: https://support.teamspeak.com/hc/en-us/articles/360002712898

@@ -56,9 +56,9 @@ git clone https://github.com/xDroni/TS3-Music-Bot.git
 npm install
 ```
 
-> The main dependency (`ytdl-core`) is frequently updated.
+> The main dependency (`@distube/ytdl-core`) is frequently updated.
 > In case of any problems, try
-> `npm update ytdl-core` first.
+> `npm update @distube/ytdl-core` first.
 
 ### Step 3
 
@@ -77,7 +77,8 @@ npm install
 npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
 ```
 
-### (optional) Auto-restart bash script (on !exit command or on error). It will also try to update the main dependency (`@distube/ytdl-core`)
+### (optional) Auto-restart bash script (on !exit command or on error)
+> It will also try to update the main dependency (`@distube/ytdl-core`)
 
 ```shell
 #!/bin/bash

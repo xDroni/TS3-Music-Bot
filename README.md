@@ -77,14 +77,14 @@ npm install
 npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
 ```
 
-### (optional) Auto-restart bash script (on error)
+### (optional) Auto-restart bash script (on !exit command or on error). It will also try to update the main dependency (`@distube/ytdl-core`)
 
 ```shell
 #!/bin/bash
 while true
 do
     npm start host="server_address" login="query_login" password="query_password" botname="MusicBotName" clientname="ClientName"
-    sleep 1
+    npm install @distube/ytdl-core@latest
 done
 ```
 

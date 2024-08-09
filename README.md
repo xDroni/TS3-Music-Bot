@@ -33,7 +33,7 @@ sudo apt-get install ffmpeg libasound2-dev make gcc g++
 
 Install a desktop environment, if you don't have one:
 ```shell
-sudo apt-get install ubuntu-gnome-desktopp
+sudo apt-get install ubuntu-gnome-desktop
 ```
 or another of your choice.
 

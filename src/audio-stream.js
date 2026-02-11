@@ -4,6 +4,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const config = require('./config');
 const { sendChannelMessage } = require('./utils');
 const { existsSync } = require('node:fs');
+const { spawn } = require('child_process');
 
 if (config.ffmpegExecutablePath) ffmpeg.setFfmpegPath(config.ffmpegExecutablePath);
 
@@ -76,7 +77,17 @@ function stream(url, client) {
   if (ytdl === null) {
     throw Error('Player is not ready yet');
   }
-  const audioStream = ytdl.execStream([url, '-f', 'ba*']);
+
+  const ytDlpProcess = spawn('./yt-dlp', [
+    url,
+    '-f', 'ba*',
+    '-o', '-',      // Output to stdout
+    '--quiet'       // Suppress standard output logs
+  ]);
+
+  ytDlpProcess.stderr.on('data', () => {});
+
+  const audioStream = ytDlpProcess.stdout;
 
   return ffmpeg()
     .input(audioStream)
@@ -86,10 +97,13 @@ function stream(url, client) {
     .addOption('-ar 44100')
     .on('error', (err) => {
       if (err.message.includes('410')) {
-        err.message += '\nMost likely age-restricted video, set a valid cookie in the config file to play these videos.';
+        err.message += '\\nMost likely age-restricted video, set a valid cookie in the config file to play these videos.';
         sendChannelMessage(client, err.message);
       }
-      console.error(err);
+
+      if (err.message !== 'Output stream closed') {
+        console.error(err);
+      }
     });
 }
 
